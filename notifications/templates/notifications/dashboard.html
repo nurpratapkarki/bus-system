@@ -1,0 +1,394 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Dashboard | Bus Management System{% endblock %}
+
+{% block extrastyle %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+    .dashboard-container {
+        padding: 20px;
+    }
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+        font-weight: bold;
+    }
+    .stat-card {
+        text-align: center;
+        padding: 20px;
+    }
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .stat-label {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+    .notification-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .notification-item {
+        padding: 10px 15px;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s;
+    }
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+    .notification-item.unread {
+        background-color: #e8f4fd;
+    }
+    .notification-item.unread:hover {
+        background-color: #d8eaf9;
+    }
+    .notification-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .notification-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    .chart-container {
+        height: 300px;
+    }
+    #notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        font-size: 0.7rem;
+    }
+    .btn-mark-all {
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-tachometer-alt me-2"></i> Dashboard</h1>
+        <div class="position-relative">
+            <button class="btn btn-outline-primary" id="notification-btn">
+                <i class="fas fa-bell"></i>
+                {% if unread_count > 0 %}
+                <span class="badge bg-danger rounded-pill" id="notification-badge">{{ unread_count }}</span>
+                {% endif %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-icon text-primary">
+                    <i class="fas fa-bus"></i>
+                </div>
+                <div class="stat-value" id="active-vehicles">--</div>
+                <div class="stat-label">Active Vehicles</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-icon text-success">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-value" id="today-schedules">--</div>
+                <div class="stat-label">Today's Schedules</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-icon text-warning">
+                    <i class="fas fa-bookmark"></i>
+                </div>
+                <div class="stat-value" id="pending-reservations">--</div>
+                <div class="stat-label">Pending Reservations</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="stat-icon text-info">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="stat-value" id="monthly-revenue">--</div>
+                <div class="stat-label">Monthly Revenue</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-chart-line me-2"></i> Reservation Trends
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="reservationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-chart-pie me-2"></i> Vehicle Utilization
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="utilizationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity and Notifications -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <i class="fas fa-history me-2"></i> Recent Activity
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush" id="recent-activity">
+                        <li class="list-group-item text-center py-5">Loading recent activity...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-bell me-2"></i> Notifications
+                    </div>
+                    <button class="btn btn-sm btn-light btn-mark-all" id="mark-all-read">Mark All Read</button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="notification-list" id="notification-list">
+                        <div class="text-center py-5">Loading notifications...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-bell me-2"></i> Notifications
+                    {% if unread_count > 0 %}
+                    <span class="badge bg-danger rounded-pill">{{ unread_count }}</span>
+                    {% endif %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="list-group list-group-flush" id="modal-notification-list">
+                    <div class="text-center py-5">Loading notifications...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="modal-mark-all-read">Mark All Read</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Initialize dashboard with context data
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize stat cards with data from context
+        document.getElementById('active-vehicles').textContent = '{{ active_vehicles }}';
+        document.getElementById('today-schedules').textContent = '{{ today_schedules }}';
+        document.getElementById('pending-reservations').textContent = '{{ pending_reservations }}';
+        document.getElementById('monthly-revenue').textContent = 'Rs. {{ monthly_revenue }}';
+        
+        // Initialize notification list with data from context
+        const notificationList = document.getElementById('notification-list');
+        notificationList.innerHTML = '';
+        
+        {% if recent_notifications %}
+            {% for notification in recent_notifications %}
+                const item = document.createElement('div');
+                item.className = 'notification-item {% if not notification.is_read %}unread{% endif %}';
+                item.dataset.id = '{{ notification.id }}';
+                
+                item.innerHTML = `
+                    <div class="notification-title">{{ notification.title }}</div>
+                    <div class="notification-message">{{ notification.message }}</div>
+                    <div class="notification-time">{{ notification.created_at }}</div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    markNotificationRead('{{ notification.id }}');
+                });
+                
+                notificationList.appendChild(item);
+            {% endfor %}
+        {% else %}
+            notificationList.innerHTML = '<div class="text-center py-5">No notifications</div>';
+        {% endif %}
+        
+        // Load dashboard data from API
+        fetchDashboardData();
+        fetchChartData();
+        
+        // Setup WebSocket connection for real-time notifications
+        setupWebSocket();
+    });
+    
+    function fetchDashboardData() {
+        fetch('/api/dashboard/')
+            .then(response => response.json())
+            .then(data => {
+                // Update stat cards
+                document.getElementById('active-vehicles').textContent = data.active_vehicles;
+                document.getElementById('today-schedules').textContent = data.today_schedules;
+                document.getElementById('pending-reservations').textContent = data.pending_reservations;
+                document.getElementById('monthly-revenue').textContent = 'Rs. ' + data.monthly_revenue;
+                
+                // Update recent activity
+                const activityList = document.getElementById('recent-activity');
+                activityList.innerHTML = '';
+                
+                if (data.recent_activity && data.recent_activity.length > 0) {
+                    data.recent_activity.forEach(activity => {
+                        const date = new Date(activity.timestamp);
+                        const formattedDate = date.toLocaleString();
+                        
+                        const item = document.createElement('li');
+                        item.className = 'list-group-item';
+                        item.innerHTML = `
+                            <div class="d-flex justify-content-between">
+                                <strong>${activity.user}</strong>
+                                <small>${formattedDate}</small>
+                            </div>
+                            <div>${activity.action}</div>
+                            <small class="text-muted">${activity.details}</small>
+                        `;
+                        
+                        activityList.appendChild(item);
+                    });
+                } else {
+                    activityList.innerHTML = '<li class="list-group-item text-center">No recent activity</li>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching dashboard data:', error);
+            });
+    }
+    
+    function fetchChartData() {
+        fetch('/api/dashboard/charts/')
+            .then(response => response.json())
+            .then(data => {
+                // Reservation trends chart
+                const reservationCtx = document.getElementById('reservationChart').getContext('2d');
+                new Chart(reservationCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.reservation_trends.labels,
+                        datasets: [
+                            {
+                                label: 'Regular Reservations',
+                                data: data.reservation_trends.regular,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Special Reservations',
+                                data: data.reservation_trends.special,
+                                borderColor: 'rgba(255, 159, 64, 1)',
+                                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                // Vehicle utilization chart
+                const utilizationCtx = document.getElementById('utilizationChart').getContext('2d');
+                new Chart(utilizationCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['In Use', 'Available', 'Maintenance'],
+                        datasets: [{
+                            data: [
+                                data.vehicle_utilization.in_use,
+                                data.vehicle_utilization.available,
+                                data.vehicle_utilization.maintenance
+                            ],
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(255, 205, 86, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(255, 205, 86, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching chart data:', error);
+            });
+    }
+
+    // WebSocket setup and other functions...
+    // ... (retain existing WebSocket and notification functions)
+</script>
+{% endblock %} 

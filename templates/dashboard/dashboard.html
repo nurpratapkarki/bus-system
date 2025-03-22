@@ -1,0 +1,532 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Dashboard | Bus Management System{% endblock %}
+
+{% block extrastyle %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+    .dashboard-container {
+        padding: 20px;
+    }
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+        font-weight: bold;
+    }
+    .stat-card {
+        text-align: center;
+        padding: 20px;
+    }
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #4e73df;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .stat-label {
+        color: #5a5c69;
+        font-size: 1rem;
+    }
+    .chart-container {
+        height: 300px;
+    }
+    .table th {
+        font-weight: bold;
+    }
+    .notification-item {
+        padding: 10px;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #4e73df;
+        color: white;
+        margin-right: 15px;
+    }
+    .notification-time {
+        color: #858796;
+        font-size: 0.8rem;
+    }
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+    }
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Dashboard</h1>
+            <p class="text-muted">Welcome to the Bus Management System dashboard.</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white">
+                <div class="card-body stat-card">
+                    <i class="fas fa-bus stat-icon"></i>
+                    <div class="stat-value" id="total-vehicles">0</div>
+                    <div class="stat-label">Total Vehicles</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white">
+                <div class="card-body stat-card">
+                    <i class="fas fa-route stat-icon"></i>
+                    <div class="stat-value" id="total-routes">0</div>
+                    <div class="stat-label">Active Routes</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white">
+                <div class="card-body stat-card">
+                    <i class="fas fa-ticket-alt stat-icon"></i>
+                    <div class="stat-value" id="total-tickets">0</div>
+                    <div class="stat-label">Tickets Sold Today</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white">
+                <div class="card-body stat-card">
+                    <i class="fas fa-bookmark stat-icon"></i>
+                    <div class="stat-value" id="total-reservations">0</div>
+                    <div class="stat-label">Special Reservations</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-xl-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-chart-line mr-2"></i> Revenue Trends
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-chart-pie mr-2"></i> Ticket Distribution
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="ticketDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities & Notifications -->
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-list mr-2"></i> Recent Special Reservations
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Vehicle</th>
+                                    <th>Start Date</th>
+                                    <th>Status</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-reservations">
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <div class="loading">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-bell mr-2"></i> Recent Notifications
+                </div>
+                <div class="card-body">
+                    <div id="notifications-list">
+                        <div class="loading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to display error messages
+    function showError(containerId, message) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+        }
+        console.error(message);
+    }
+
+    // Helper function to update dashboard stats
+    function updateDashboardStats(data) {
+        try {
+            document.getElementById('total-vehicles').textContent = data.total_vehicles || 0;
+            document.getElementById('total-routes').textContent = data.total_routes || 0;
+            document.getElementById('total-tickets').textContent = data.tickets_today || 0;
+            document.getElementById('total-reservations').textContent = data.special_reservations || 0;
+            console.log("Dashboard stats updated successfully");
+        } catch (error) {
+            console.error("Error updating dashboard stats:", error);
+        }
+    }
+
+    // Helper function to update recent reservations
+    function updateRecentReservations(reservations) {
+        const reservationsTable = document.getElementById('recent-reservations');
+        if (!reservationsTable) {
+            console.error("Reservation table element not found");
+            return;
+        }
+        
+        if (!reservations || !Array.isArray(reservations) || reservations.length === 0) {
+            reservationsTable.innerHTML = '<tr><td colspan="6" class="text-center">No recent reservations</td></tr>';
+            return;
+        }
+        
+        try {
+            reservationsTable.innerHTML = '';
+            reservations.forEach(reservation => {
+                if (!reservation) return;
+                
+                const id = reservation.id ? reservation.id.substring(0, 8) + '...' : 'N/A';
+                const customerName = reservation.customer_name || 'N/A';
+                const vehicleName = reservation.vehicle_name || 'Not assigned';
+                const startDate = formatDate(reservation.start_time);
+                const status = reservation.status || 'Unknown';
+                const statusClass = getStatusClass(status);
+                const price = reservation.final_price != null ? reservation.final_price : 0;
+                
+                reservationsTable.innerHTML += `
+                    <tr>
+                        <td>${id}</td>
+                        <td>${customerName}</td>
+                        <td>${vehicleName}</td>
+                        <td>${startDate}</td>
+                        <td><span class="badge ${statusClass}">${status}</span></td>
+                        <td>₹${price}</td>
+                    </tr>
+                `;
+            });
+            console.log("Recent reservations updated successfully");
+        } catch (error) {
+            console.error("Error updating recent reservations:", error);
+            reservationsTable.innerHTML = '<tr><td colspan="6" class="text-center">Error loading reservation data</td></tr>';
+        }
+    }
+
+    // Fetch dashboard data
+    fetch('/api/dashboard/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Dashboard data received:", data);
+            
+            // Update statistics
+            updateDashboardStats(data);
+            
+            // Update recent reservations
+            updateRecentReservations(data.recent_reservations);
+            
+            // Load chart data
+            loadCharts();
+        })
+        .catch(error => {
+            console.error('Error fetching dashboard data:', error);
+            showError('recent-reservations', 'Failed to load dashboard data. Please try refreshing the page.');
+        });
+    
+    // Fetch notifications
+    fetch('/notifications/api/notifications/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Notifications data received:", data);
+            const notificationsList = document.getElementById('notifications-list');
+            if (!notificationsList) {
+                console.error("Notifications list element not found");
+                return;
+            }
+            
+            if (data && Array.isArray(data) && data.length > 0) {
+                notificationsList.innerHTML = '';
+                data.forEach(notification => {
+                    notificationsList.innerHTML += `
+                        <div class="notification-item d-flex align-items-center">
+                            <div class="notification-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">${notification.title || 'Notification'}</div>
+                                <div>${notification.message || 'No message'}</div>
+                                <div class="notification-time">${formatDateTime(notification.created_at)}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                notificationsList.innerHTML = '<div class="text-center p-3">No new notifications</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching notifications:', error);
+            const notificationsList = document.getElementById('notifications-list');
+            if (notificationsList) {
+                notificationsList.innerHTML = '<div class="text-center p-3">Failed to load notifications</div>';
+            }
+        });
+    
+    function loadCharts() {
+        fetch('/api/dashboard/charts/')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Chart data received:", data);
+                
+                // Revenue Chart
+                createRevenueChart(data.revenue_chart);
+                
+                // Ticket Distribution Chart
+                createTicketDistributionChart(data.ticket_distribution);
+            })
+            .catch(error => {
+                console.error('Error fetching chart data:', error);
+                showError('revenueChart', 'Failed to load chart data.');
+                showError('ticketDistributionChart', 'Failed to load chart data.');
+            });
+    }
+    
+    function createRevenueChart(chartData) {
+        try {
+            if (!chartData || !chartData.labels || !chartData.data) {
+                throw new Error("Invalid revenue chart data");
+            }
+            
+            const revenueCtx = document.getElementById('revenueChart');
+            if (!revenueCtx) {
+                throw new Error("Revenue chart canvas not found");
+            }
+            
+            new Chart(revenueCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: chartData.data,
+                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                        borderColor: 'rgba(78, 115, 223, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+            console.log("Revenue chart created successfully");
+        } catch (error) {
+            console.error("Error creating revenue chart:", error);
+            const container = document.getElementById('revenueChart').parentNode;
+            container.innerHTML = `<div class="alert alert-danger">Failed to load revenue chart: ${error.message}</div>`;
+        }
+    }
+    
+    function createTicketDistributionChart(chartData) {
+        try {
+            if (!chartData || !chartData.labels || !chartData.data) {
+                throw new Error("Invalid ticket distribution chart data");
+            }
+            
+            const ticketDistributionCtx = document.getElementById('ticketDistributionChart');
+            if (!ticketDistributionCtx) {
+                throw new Error("Ticket distribution chart canvas not found");
+            }
+            
+            new Chart(ticketDistributionCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        data: chartData.data,
+                        backgroundColor: [
+                            'rgba(78, 115, 223, 0.7)',
+                            'rgba(28, 200, 138, 0.7)',
+                            'rgba(54, 185, 204, 0.7)',
+                            'rgba(246, 194, 62, 0.7)',
+                            'rgba(231, 74, 59, 0.7)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+            console.log("Ticket distribution chart created successfully");
+        } catch (error) {
+            console.error("Error creating ticket distribution chart:", error);
+            const container = document.getElementById('ticketDistributionChart').parentNode;
+            container.innerHTML = `<div class="alert alert-danger">Failed to load ticket chart: ${error.message}</div>`;
+        }
+    }
+    
+    function getStatusClass(status) {
+        if (!status) return 'bg-secondary';
+        
+        switch(status.toLowerCase()) {
+            case 'pending':
+            case 'requested':
+                return 'bg-warning';
+            case 'approved':
+                return 'bg-success';
+            case 'rejected':
+                return 'bg-danger';
+            case 'completed':
+                return 'bg-info';
+            default:
+                return 'bg-secondary';
+        }
+    }
+    
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'Invalid Date';
+            return date.toLocaleDateString();
+        } catch (error) {
+            console.error(`Error formatting date ${dateString}:`, error);
+            return 'Error';
+        }
+    }
+    
+    function formatDateTime(dateString) {
+        if (!dateString) return 'N/A';
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'Invalid Date';
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        } catch (error) {
+            console.error(`Error formatting datetime ${dateString}:`, error);
+            return 'Error';
+        }
+    }
+});
+</script>
+{% endblock %} 

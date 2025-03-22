@@ -1,0 +1,4 @@
+Here i need to update this entire project with basic changes for entire project.
+First now this will no longer to buses, There will be for all kind of vechicles,  we will add the New model name Vechile Type, Then Vechile subtype/model( like bus have ac, non ac and other vechicles dont have that features but its completely on data entry not on choices)and we will make seat configuration on the Registerd vechile( like seat rows, registeration number row count and vechile model on pre existing Bus model  ). 
+
+To make the calculations fairly, just make the js better for autofilling the claculations, not the calculators to put the price.. and there is bug where i cannot delete Vechile, fix that, and do the changes 
