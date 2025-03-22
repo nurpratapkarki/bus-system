@@ -523,6 +523,31 @@
             </div>
         </div>
     </div>
+
+    <div class="row my-3">
+        <div class="col-md-6">
+            <a href="{% url 'ticket_list' %}" class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <div class="card-info">
+                    <h3>Special Reservations</h3>
+                    <p>Manage special group reservations</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a href="{% url 'regular_ticket_list' %}" class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div class="card-info">
+                    <h3>Regular Tickets</h3>
+                    <p>Manage individual tickets</p>
+                </div>
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

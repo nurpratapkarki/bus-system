@@ -24,12 +24,15 @@ from drf_yasg import openapi
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from . import api
-from bus_management.models import SpecialReservation
+from bus_management.models import SpecialReservation, Ticket
 from django.utils import timezone
 from datetime import timedelta
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 import datetime
+from django.contrib import messages
+from django.urls import reverse
+from django.urls import reverse_lazy
 
 # Helper function to get admin context
 def get_admin_context(request, title):
@@ -318,6 +321,261 @@ def reservation_ticket_view(request, reservation_id):
     
     return render(request, 'dashboard/reservation_ticket.html', context)
 
+@login_required
+def regular_ticket_view(request, ticket_id):
+    """View to show a regular ticket in a printable format"""
+    try:
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+        print(f"Found ticket: {ticket.id}")
+        
+        # Get customer name
+        customer_name = "Not Available"
+        if hasattr(ticket, 'customer') and ticket.customer:
+            print(f"Customer object: {ticket.customer}")
+            if hasattr(ticket.customer, 'full_name') and ticket.customer.full_name:
+                customer_name = ticket.customer.full_name
+            elif hasattr(ticket.customer, 'username') and ticket.customer.username:
+                customer_name = ticket.customer.username
+            elif hasattr(ticket.customer, 'name') and ticket.customer.name:
+                customer_name = ticket.customer.name
+        
+        # Get vehicle details
+        vehicle_name = "Not Available"
+        route_name = "Not Available"
+        departure_time = "Not Available"
+        arrival_time = "Not Available"
+        source = "Not Available"
+        destination = "Not Available"
+        
+        if hasattr(ticket, 'schedule') and ticket.schedule:
+            print(f"Schedule object: {ticket.schedule}")
+            if hasattr(ticket.schedule, 'vehicle') and ticket.schedule.vehicle:
+                if hasattr(ticket.schedule.vehicle, 'name'):
+                    vehicle_name = ticket.schedule.vehicle.name
+                
+            if hasattr(ticket.schedule, 'route') and ticket.schedule.route:
+                if hasattr(ticket.schedule.route, 'name'):
+                    route_name = ticket.schedule.route.name
+                if hasattr(ticket.schedule.route, 'source'):
+                    source = ticket.schedule.route.source
+                if hasattr(ticket.schedule.route, 'destination'):
+                    destination = ticket.schedule.route.destination
+            
+            if hasattr(ticket.schedule, 'departure_time'):
+                departure_time = ticket.schedule.departure_time
+            if hasattr(ticket.schedule, 'arrival_time'):
+                arrival_time = ticket.schedule.arrival_time
+            elif hasattr(ticket.schedule, 'estimated_arrival_time'):
+                arrival_time = ticket.schedule.estimated_arrival_time
+        
+        # Get seat number
+        seat_number = "Not Available"
+        if hasattr(ticket, 'seat') and ticket.seat:
+            print(f"Seat object: {ticket.seat}")
+            if hasattr(ticket.seat, 'seat_number'):
+                seat_number = ticket.seat.seat_number
+        
+        # Get price information
+        base_price = 0
+        discount_amount = 0
+        final_price = 0
+        
+        if hasattr(ticket, 'base_price'):
+            base_price = ticket.base_price
+        if hasattr(ticket, 'discount_amount'):
+            discount_amount = ticket.discount_amount
+        if hasattr(ticket, 'final_price'):
+            final_price = ticket.final_price
+        
+        # Format datetime for display
+        booking_time = ticket.booking_time.strftime("%Y-%m-%d %H:%M") if hasattr(ticket, 'booking_time') and ticket.booking_time else "Not Available"
+        
+        # Prepare barcode data
+        barcode_data = f"T{ticket.id}"
+        
+        # Prepare context
+        context = get_admin_context(request, f"Ticket #{ticket.id}")
+        context.update({
+            'ticket': ticket,
+            'customer_name': customer_name,
+            'vehicle_name': vehicle_name,
+            'route_name': route_name,
+            'source': source,
+            'destination': destination,
+            'departure_time': departure_time,
+            'arrival_time': arrival_time,
+            'seat_number': seat_number,
+            'base_price': base_price,
+            'discount_amount': discount_amount,
+            'final_price': final_price,
+            'booking_time': booking_time,
+            'barcode_data': barcode_data,
+            'print_mode': 'print=true' in request.GET,
+        })
+        
+        print(f"Rendering template with context: {context.keys()}")
+        return render(request, 'dashboard/regular_ticket.html', context)
+    except Exception as e:
+        print(f"Error in regular_ticket_view: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f"Error viewing ticket: {str(e)}")
+        return redirect('regular_ticket_list')
+
+@login_required
+def regular_ticket_list(request):
+    """View to show a list of all regular tickets"""
+    try:
+        # Print debug info
+        print(f"DEBUG: regular_ticket_list called")
+        print(f"DEBUG: User: {request.user}")
+        print(f"DEBUG: Path: {request.path}")
+        
+        # Get all regular tickets
+        tickets_query = Ticket.objects.all().order_by('-booking_time')
+        print(f"Found {tickets_query.count()} tickets")
+        
+        # Handle status filter
+        status_filter = request.GET.get('status', '')
+        if status_filter:
+            tickets_query = tickets_query.filter(status=status_filter)
+        
+        # Handle search query
+        search_query = request.GET.get('search', '')
+        if search_query:
+            q_objects = Q()
+            
+            # Check for ID match
+            try:
+                ticket_id = int(search_query)
+                q_objects |= Q(id=ticket_id)
+            except ValueError:
+                pass
+            
+            # Check for customer match
+            if hasattr(Ticket, 'customer'):
+                if hasattr(Ticket.customer.field.related_model, 'full_name'):
+                    q_objects |= Q(customer__full_name__icontains=search_query)
+                if hasattr(Ticket.customer.field.related_model, 'username'):
+                    q_objects |= Q(customer__username__icontains=search_query)
+            
+            # Check for vehicle/schedule match
+            if hasattr(Ticket, 'schedule'):
+                if hasattr(Ticket.schedule.field.related_model, 'vehicle'):
+                    if hasattr(Ticket.schedule.field.related_model.vehicle.field.related_model, 'name'):
+                        q_objects |= Q(schedule__vehicle__name__icontains=search_query)
+                
+                if hasattr(Ticket.schedule.field.related_model, 'route'):
+                    if hasattr(Ticket.schedule.field.related_model.route.field.related_model, 'name'):
+                        q_objects |= Q(schedule__route__name__icontains=search_query)
+                    if hasattr(Ticket.schedule.field.related_model.route.field.related_model, 'source'):
+                        q_objects |= Q(schedule__route__source__icontains=search_query)
+                    if hasattr(Ticket.schedule.field.related_model.route.field.related_model, 'destination'):
+                        q_objects |= Q(schedule__route__destination__icontains=search_query)
+            
+            # Apply the search filters if any were added
+            if q_objects:
+                tickets_query = tickets_query.filter(q_objects)
+        
+        # Handle date range filters
+        date_from = request.GET.get('date_from', '')
+        date_to = request.GET.get('date_to', '')
+        
+        if date_from:
+            try:
+                date_from_obj = datetime.datetime.strptime(date_from, '%Y-%m-%d')
+                tickets_query = tickets_query.filter(booking_time__gte=date_from_obj)
+            except ValueError:
+                pass
+        
+        if date_to:
+            try:
+                date_to_obj = datetime.datetime.strptime(date_to, '%Y-%m-%d')
+                date_to_obj = date_to_obj.replace(hour=23, minute=59, second=59)
+                tickets_query = tickets_query.filter(booking_time__lte=date_to_obj)
+            except ValueError:
+                pass
+        
+        # Prepare data for template
+        status_choices = [choice[0] for choice in Ticket._meta.get_field('status').choices]
+        
+        # Paginate results
+        paginator = Paginator(tickets_query, 10)  # Show 10 tickets per page
+        page = request.GET.get('page')
+        try:
+            tickets_list = paginator.page(page)
+        except PageNotAnInteger:
+            tickets_list = paginator.page(1)
+        except EmptyPage:
+            tickets_list = paginator.page(paginator.num_pages)
+        
+        # Format data for display
+        formatted_tickets = []
+        for ticket in tickets_list:
+            # Get customer name
+            customer_name = "Not Available"
+            if hasattr(ticket, 'customer') and ticket.customer:
+                if hasattr(ticket.customer, 'full_name') and ticket.customer.full_name:
+                    customer_name = ticket.customer.full_name
+                elif hasattr(ticket.customer, 'username') and ticket.customer.username:
+                    customer_name = ticket.customer.username
+                elif hasattr(ticket.customer, 'name') and ticket.customer.name:
+                    customer_name = ticket.customer.name
+            
+            # Get vehicle name
+            vehicle_name = "Not Available"
+            if hasattr(ticket, 'schedule') and ticket.schedule:
+                if hasattr(ticket.schedule, 'vehicle') and ticket.schedule.vehicle:
+                    if hasattr(ticket.schedule.vehicle, 'name'):
+                        vehicle_name = ticket.schedule.vehicle.name
+            
+            # Get seat number
+            seat_number = "Not Available"
+            if hasattr(ticket, 'seat') and ticket.seat:
+                if hasattr(ticket.seat, 'seat_number'):
+                    seat_number = ticket.seat.seat_number
+            
+            # Get departure time
+            departure_time = "Not Available"
+            if hasattr(ticket, 'schedule') and ticket.schedule:
+                if hasattr(ticket.schedule, 'departure_time'):
+                    departure_time = ticket.schedule.departure_time.strftime("%Y-%m-%d %H:%M") if ticket.schedule.departure_time else "Not Available"
+            
+            # Get final price
+            final_price = 0
+            if hasattr(ticket, 'final_price'):
+                final_price = ticket.final_price
+            
+            formatted_tickets.append({
+                'id': ticket.id,
+                'customer_name': customer_name,
+                'vehicle_name': vehicle_name,
+                'seat_number': seat_number,
+                'departure_time': departure_time,
+                'status': ticket.status,
+                'final_price': final_price,
+            })
+        
+        # Prepare context
+        context = get_admin_context(request, "Regular Tickets")
+        context.update({
+            'tickets': formatted_tickets,  # Use formatted_tickets directly in the template
+            'status_choices': status_choices,
+            'status_filter': status_filter,
+            'search_query': search_query,
+            'date_from': date_from,
+            'date_to': date_to,
+        })
+        
+        print(f"Rendering ticket list with {len(formatted_tickets)} tickets")
+        return render(request, 'dashboard/regular_ticket_list.html', context)
+    except Exception as e:
+        print(f"Error in regular_ticket_list: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f"Error listing tickets: {str(e)}")
+        return redirect('admin_dashboard')
+
 # Swagger documentation setup
 schema_view = get_schema_view(
    openapi.Info(
@@ -335,8 +593,10 @@ schema_view = get_schema_view(
 urlpatterns = [
     # Dashboard must come before admin to prevent admin catch-all from capturing it
     path('dashboard/', dashboard_view, name='admin_dashboard'),
-    path('dashboard/tickets/', ticket_list_view, name='ticket_list'),
+    path('dashboard/special-tickets/', ticket_list_view, name='ticket_list'),
     path('dashboard/reservation/<uuid:reservation_id>/ticket/', reservation_ticket_view, name='reservation_ticket'),
+    path('dashboard/regular-tickets/', regular_ticket_list, name='regular_ticket_list'),
+    path('dashboard/ticket/<uuid:ticket_id>/', regular_ticket_view, name='regular_ticket_view'),
     
     # New unified API endpoints
     path('api/v1/dashboard/', api.dashboard_data, name='api_dashboard'),

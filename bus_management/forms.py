@@ -188,7 +188,8 @@ class SpecialReservationAdminForm(forms.ModelForm):
             
         # Add help texts
         self.fields['distance_km'].help_text = "Distance in kilometers affects the base price"
-        self.fields['duration_days'].help_text = "Number of days affects the pricing calculation"
+        if 'duration_days' in self.fields:
+            self.fields['duration_days'].help_text = "Number of days affects the pricing calculation"
         self.fields['season_factor'].help_text = "E.g., 1.2 for high season, 0.9 for low season"
         
     def clean(self):
