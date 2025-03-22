@@ -1,18 +1,18 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
 
-{% block title %}Ticket #{{ ticket.id }} | Bus Management System{% endblock %}
+{% block title %}Ticket #{{ ticket.id }} | SkyBus Express{% endblock %}
 
 {% block extrastyle %}
 <style>
     @page {
-        size: A5;
+        size: A4;
         margin: 0;
     }
     
     body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f8f9fa;
+        font-family: 'Roboto', 'Segoe UI', sans-serif;
+        background-color: #f0f2f5;
         margin: 0;
         padding: 0;
     }
@@ -23,104 +23,105 @@
     
     .ticket-container {
         position: relative;
-        width: 100%;
-        max-width: 595px;
-        min-height: 420px;
+        width: 210mm;
+        height: 297mm;
         margin: 20px auto;
         background: #fff;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
         overflow: hidden;
-        border: 1px solid #ddd;
-    }
-    
-    .ticket-border {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border: 2px solid #3f37c9;
-        border-radius: 10px;
-        pointer-events: none;
-        z-index: 1;
-    }
-    
-    .ticket-decorative-border {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        right: 10px;
-        bottom: 10px;
-        border: 1px dashed #3f37c9;
-        border-radius: 7px;
-        pointer-events: none;
-        z-index: 1;
+        border: 1px solid #e0e0e0;
     }
     
     .ticket-header {
-        background: #3f37c9;
-        padding: 15px 20px;
+        background: linear-gradient(135deg, #1a2b66 0%, #0061a7 100%);
+        padding: 25px 40px;
         color: white;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid #ddd;
+    }
+    
+    .ticket-title-section {
+        display: flex;
+        flex-direction: column;
     }
     
     .ticket-title {
-        font-size: 1.5rem;
+        font-size: 2.2rem;
         font-weight: 700;
         margin: 0;
+        letter-spacing: 1px;
+    }
+    
+    .ticket-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-top: 5px;
     }
     
     .ticket-logo {
-        font-size: 1.8rem;
+        font-size: 2.5rem;
         font-weight: 900;
+        letter-spacing: 2px;
+        background: linear-gradient(90deg, #ffffff, #e0f2ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
     
     .ticket-body {
-        padding: 20px;
+        padding: 30px 40px;
         position: relative;
     }
     
+    .ticket-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    
     .ticket-section {
-        margin-bottom: 15px;
+        margin-bottom: 25px;
+        background: #f9fbfd;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        border-left: 4px solid #1a2b66;
     }
     
     .section-title {
         font-weight: 700;
-        color: #3f37c9;
-        margin-bottom: 5px;
-        font-size: 1.1rem;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 5px;
+        color: #1a2b66;
+        margin-bottom: 12px;
+        font-size: 1.2rem;
+        border-bottom: 1px solid #e0e8f5;
+        padding-bottom: 8px;
     }
     
     .info-row {
         display: flex;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
     }
     
     .info-label {
         flex: 0 0 40%;
         font-weight: 600;
-        color: #555;
+        color: #5a6474;
     }
     
     .info-value {
         flex: 0 0 60%;
+        color: #202734;
     }
     
     .ticket-divider {
         height: 1px;
-        background: repeating-linear-gradient(to right, #ccc, #ccc 5px, transparent 5px, transparent 10px);
-        margin: 15px 0;
+        background: #e0e8f5;
+        margin: 20px 0;
     }
     
     .status-badge {
         display: inline-block;
-        padding: 4px 10px;
+        padding: 4px 12px;
         border-radius: 30px;
         font-weight: 500;
         font-size: 0.85rem;
@@ -128,18 +129,18 @@
     }
     
     .status-reserved, .status-confirmed {
-        background-color: rgba(0, 180, 216, 0.15);
-        color: #00b4d8;
+        background-color: rgba(0, 127, 255, 0.15);
+        color: #007fff;
     }
     
     .status-completed {
-        background-color: rgba(43, 147, 72, 0.15);
-        color: #2b9348;
+        background-color: rgba(40, 167, 69, 0.15);
+        color: #28a745;
     }
     
     .status-cancelled {
-        background-color: rgba(247, 37, 133, 0.15);
-        color: #f72585;
+        background-color: rgba(220, 53, 69, 0.15);
+        color: #dc3545;
     }
     
     .watermark {
@@ -147,25 +148,26 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(-45deg);
-        color: rgba(63, 55, 201, 0.05);
-        font-size: 8rem;
+        color: rgba(26, 43, 102, 0.03);
+        font-size: 12rem;
         font-weight: 900;
         pointer-events: none;
         z-index: 0;
+        white-space: nowrap;
     }
     
     .approval-stamp {
         position: absolute;
-        right: 30px;
+        right: 50px;
         bottom: 100px;
-        width: 100px;
-        height: 100px;
+        width: 110px;
+        height: 110px;
         display: flex;
         justify-content: center;
         align-items: center;
-        border: 2px solid rgba(63, 55, 201, 0.3);
+        border: 2.5px solid rgba(26, 43, 102, 0.3);
         border-radius: 50%;
-        color: rgba(63, 55, 201, 0.5);
+        color: rgba(26, 43, 102, 0.6);
         font-weight: 700;
         font-size: 0.9rem;
         text-align: center;
@@ -176,90 +178,193 @@
     .barcode-section {
         display: flex;
         justify-content: center;
-        margin-top: 10px;
+        margin-top: 25px;
     }
     
     .barcode-container {
         text-align: center;
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
     
     .barcode-number {
         font-family: monospace;
-        font-size: 0.8rem;
-        margin-top: 5px;
+        font-size: 0.9rem;
+        margin-top: 8px;
+        color: #1a2b66;
     }
     
     .ticket-footer {
-        padding: 10px 20px;
-        background: #f8f9fa;
-        border-top: 1px dashed #ccc;
+        padding: 15px 40px;
+        background: #f0f4fa;
+        border-top: 1px solid #e0e8f5;
         font-size: 0.9rem;
         text-align: center;
-        color: #6c757d;
+        color: #5a6474;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        box-sizing: border-box;
     }
     
     .ticket-contact {
         font-weight: 600;
+        color: #1a2b66;
+    }
+    
+    .ticket-info-box {
+        background: #f9fbfd;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 30px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .journey-visual {
+        display: flex;
+        align-items: center;
+        margin: 15px 0;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .journey-point {
+        text-align: center;
+        flex: 1;
+    }
+    
+    .journey-point-city {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #1a2b66;
+    }
+    
+    .journey-point-time {
+        font-size: 0.9rem;
+        color: #5a6474;
+        margin-top: 5px;
+    }
+    
+    .journey-separator {
+        flex: 2;
+        height: 2px;
+        background: linear-gradient(90deg, #1a2b66 0%, #1a2b66 50%, #1a2b66 100%);
+        background-size: 10px 2px;
+        position: relative;
+        margin: 0 15px;
+    }
+    
+    .journey-separator::before, .journey-separator::after {
+        content: '';
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #1a2b66;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .journey-separator::before {
+        left: 0;
+    }
+    
+    .journey-separator::after {
+        right: 0;
+    }
+    
+    .key-info {
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+        background: linear-gradient(135deg, #f0f4fa 0%, #e9f0f9 100%);
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+    }
+    
+    .key-info-item {
+        text-align: center;
+        flex: 1;
+    }
+    
+    .key-info-label {
+        font-size: 0.85rem;
+        color: #5a6474;
+        margin-bottom: 5px;
+    }
+    
+    .key-info-value {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #1a2b66;
     }
     
     .btn-print {
         position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: #3f37c9;
+        bottom: 30px;
+        right: 30px;
+        background: #1a2b66;
         color: white;
         border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
+        padding: 12px 24px;
+        border-radius: 8px;
         cursor: pointer;
         font-weight: 600;
         display: flex;
         align-items: center;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(26, 43, 102, 0.25);
         transition: all 0.3s;
     }
     
     .btn-print:hover {
-        background: #312ba3;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        background: #0d1b48;
+        box-shadow: 0 6px 20px rgba(26, 43, 102, 0.35);
     }
     
     .btn-print i {
-        margin-right: 8px;
+        margin-right: 10px;
     }
     
     .back-btn {
         position: fixed;
-        bottom: 20px;
-        left: 20px;
-        background: #6c757d;
+        bottom: 30px;
+        left: 30px;
+        background: #5a6474;
         color: white;
         border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
+        padding: 12px 24px;
+        border-radius: 8px;
         cursor: pointer;
         font-weight: 600;
         display: flex;
         align-items: center;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(90, 100, 116, 0.25);
         transition: all 0.3s;
         text-decoration: none;
     }
     
     .back-btn:hover {
-        background: #5a6268;
+        background: #48515e;
         color: white;
         text-decoration: none;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 6px 20px rgba(90, 100, 116, 0.35);
     }
     
     .back-btn i {
-        margin-right: 8px;
+        margin-right: 10px;
     }
     
     @media print {
         @page {
-            size: A5 landscape;
+            size: A4 portrait;
             margin: 0;
         }
         
@@ -270,8 +375,8 @@
         .ticket-container {
             box-shadow: none;
             margin: 0;
-            width: 100%;
-            height: 100%;
+            width: 210mm;
+            height: 297mm;
             max-width: 100%;
             border: none;
         }
@@ -294,29 +399,29 @@
 
 {% block content %}
 <div class="ticket-container {% if print_mode %}print-mode{% endif %}">
-    <div class="ticket-border"></div>
-    <div class="ticket-decorative-border"></div>
-    
     <div class="ticket-header">
-        <div>
-            <h1 class="ticket-title">Bus Ticket</h1>
-            <span>Ref: #{{ ticket.id }}</span>
+        <div class="ticket-title-section">
+            <h1 class="ticket-title">SkyBus Express</h1>
+            <div class="ticket-subtitle">Your Journey, Our Priority</div>
         </div>
-        <div class="ticket-logo">BMS</div>
+        <div class="ticket-logo">SBE</div>
     </div>
     
     <div class="ticket-body">
-        <div class="watermark">TICKET</div>
+        <div class="watermark">SKYBUS</div>
         
-        <div class="ticket-section">
-            <div class="info-row">
-                <div class="info-label">Ticket ID:</div>
-                <div class="info-value">{{ ticket.id }}</div>
+        <div class="key-info">
+            <div class="key-info-item">
+                <div class="key-info-label">Ticket ID</div>
+                <div class="key-info-value">{{ ticket.id }}</div>
             </div>
-            <div class="info-row">
-                <div class="info-label">Status:</div>
-                <div class="info-value">
-                    {{ ticket.status }}
+            <div class="key-info-item">
+                <div class="key-info-label">Booking Date</div>
+                <div class="key-info-value">{{ ticket.booking_time|date:"d M Y" }}</div>
+            </div>
+            <div class="key-info-item">
+                <div class="key-info-label">Status</div>
+                <div class="key-info-value">
                     <span class="status-badge 
                         {% if ticket.status == 'CONFIRMED' %}status-confirmed
                         {% elif ticket.status == 'COMPLETED' %}status-completed
@@ -328,74 +433,138 @@
             </div>
         </div>
         
-        <div class="ticket-divider"></div>
-        
-        <div class="ticket-section">
-            <div class="section-title">Customer Information</div>
-            <div class="info-row">
-                <div class="info-label">Customer:</div>
-                <div class="info-value">{{ ticket.customer_name }}</div>
+        <div class="journey-visual">
+            <div class="journey-point">
+                <div class="journey-point-city" id="journey-from">{{ ticket.source }}</div>
+                <div class="journey-point-time" id="departure-time">
+                    {% if ticket.departure_time %}
+                        {{ ticket.departure_time|date:"H:i" }}
+                    {% else %}
+                        --:--
+                    {% endif %}
+                </div>
+            </div>
+            <div class="journey-separator"></div>
+            <div class="journey-point">
+                <div class="journey-point-city" id="journey-to">{{ ticket.destination }}</div>
+                <div class="journey-point-time" id="arrival-time">
+                    {% if ticket.arrival_time %}
+                        {{ ticket.arrival_time|date:"H:i" }}
+                    {% else %}
+                        --:--
+                    {% endif %}
+                </div>
             </div>
         </div>
         
-        <div class="ticket-divider"></div>
-        
-        <div class="ticket-section">
-            <div class="section-title">Journey Details</div>
-            <div class="info-row">
-                <div class="info-label">Vehicle:</div>
-                <div class="info-value">{{ ticket.vehicle_name }}</div>
+        <div class="ticket-grid">
+            <div class="ticket-section">
+                <div class="section-title">Customer Information</div>
+                <div class="info-row">
+                    <div class="info-label">Customer:</div>
+                    <div class="info-value" id="customer-name">{{ ticket.customer_name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Route:</div>
+                    <div class="info-value" id="route-name">{{ ticket.route_name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Vehicle:</div>
+                    <div class="info-value" id="vehicle-name">{{ ticket.vehicle_name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Seat Number:</div>
+                    <div class="info-value" id="seat-number">{{ ticket.seat_number }}</div>
+                </div>
             </div>
-            <div class="info-row">
-                <div class="info-label">Route:</div>
-                <div class="info-value">{{ ticket.route_name }}</div>
+            
+            <div class="ticket-section">
+                <div class="section-title">Journey Details</div>
+                <div class="info-row">
+                    <div class="info-label">Departure:</div>
+                    <div class="info-value">
+                        <span id="departure-date">
+                            {% if ticket.departure_time %}
+                                {{ ticket.departure_time|date:"D, d M Y" }}
+                            {% else %}
+                                Not Available
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Arrival:</div>
+                    <div class="info-value">
+                        <span id="arrival-date">
+                            {% if ticket.arrival_time %}
+                                {{ ticket.arrival_time|date:"D, d M Y" }}
+                            {% else %}
+                                Not Available
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Travel Time:</div>
+                    <div class="info-value">
+                        {% if ticket.departure_time and ticket.arrival_time %}
+                            {% with hours=ticket.travel_time_hours minutes=ticket.travel_time_minutes %}
+                                {{ hours }}h {{ minutes }}m
+                            {% endwith %}
+                        {% else %}
+                            Not Available
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            <div class="info-row">
-                <div class="info-label">From:</div>
-                <div class="info-value">{{ ticket.source }}</div>
+            
+            <div class="ticket-section">
+                <div class="section-title">Pricing</div>
+                <div class="info-row">
+                    <div class="info-label">Base Price:</div>
+                    <div class="info-value" id="base-price">Rs. {{ ticket.base_price }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Discount:</div>
+                    <div class="info-value" id="discount">Rs. {{ ticket.discount_amount }}</div>
+                </div>
+                <div class="info-row font-weight-bold">
+                    <div class="info-label">Final Price:</div>
+                    <div class="info-value" id="final-price">Rs. {{ ticket.final_price }}</div>
+                </div>
             </div>
-            <div class="info-row">
-                <div class="info-label">To:</div>
-                <div class="info-value">{{ ticket.destination }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Departure:</div>
-                <div class="info-value">{{ ticket.departure_time }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Expected Arrival:</div>
-                <div class="info-value">{{ ticket.arrival_time }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Seat Number:</div>
-                <div class="info-value">{{ ticket.seat_number }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Booking Time:</div>
-                <div class="info-value">{{ ticket.booking_time }}</div>
-            </div>
-        </div>
-        
-        <div class="ticket-divider"></div>
-        
-        <div class="ticket-section">
-            <div class="section-title">Price Details</div>
-            <div class="info-row">
-                <div class="info-label">Base Price:</div>
-                <div class="info-value">Rs. {{ ticket.base_price }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Discount:</div>
-                <div class="info-value">Rs. {{ ticket.discount_amount }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Final Price:</div>
-                <div class="info-value" style="font-weight: 700; color: #2b9348;">Rs. {{ ticket.final_price }}</div>
+            
+            <div class="ticket-section">
+                <div class="section-title">Booking Information</div>
+                <div class="info-row">
+                    <div class="info-label">Booked At:</div>
+                    <div class="info-value" id="booking-time">{{ ticket.booking_time }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Payment Method:</div>
+                    <div class="info-value">
+                        {% if ticket.payment_method %}
+                            {{ ticket.payment_method }}
+                        {% else %}
+                            Cash
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Agent:</div>
+                    <div class="info-value">
+                        {% if ticket.agent %}
+                            {{ ticket.agent }}
+                        {% else %}
+                            Online Booking
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
         
         <div class="approval-stamp">
-            Verified<br>Bus<br>Management<br>System
+            Verified<br>SkyBus<br>Express<br>Ticket
         </div>
         
         <div class="barcode-section">
@@ -408,7 +577,7 @@
     
     <div class="ticket-footer">
         <div>This ticket serves as proof of purchase. Please present it during boarding.</div>
-        <div class="ticket-contact">For support: +977-01-234567 | info@busmanagement.com</div>
+        <div class="ticket-contact">For support: +977-01-234567 | info@skybusexpress.com</div>
     </div>
 </div>
 
@@ -433,5 +602,130 @@
         }, 500);
         {% endif %}
     });
+
+    // Add JavaScript to fetch ticket details from API
+    document.addEventListener('DOMContentLoaded', function() {
+        // Extract ticket ID from the URL
+        const pathParts = window.location.pathname.split('/');
+        const ticketId = pathParts[pathParts.length - 2]; // Get the UUID from the URL
+        
+        if (!ticketId) {
+            console.error('No ticket ID found in URL');
+            showErrorMessage('Invalid ticket ID');
+            return;
+        }
+        
+        // Fetch ticket details from the API
+        fetch(`/api/v1/tickets/${ticketId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(ticket => {
+                // Fill in ticket details
+                updateTicketDetails(ticket);
+            })
+            .catch(error => {
+                console.error('Error fetching ticket details:', error);
+                showErrorMessage('Failed to load ticket details');
+            });
+        
+        // Function to update ticket details in the template
+        function updateTicketDetails(ticket) {
+            // Update ticket ID
+            document.querySelectorAll('.ticket-id').forEach(el => {
+                el.textContent = ticket.id;
+            });
+            
+            // Update customer info
+            if (ticket.customer) {
+                document.querySelector('#customer-name').textContent = ticket.customer.name;
+                if (document.querySelector('#customer-email')) {
+                    document.querySelector('#customer-email').textContent = ticket.customer.email || 'N/A';
+                }
+                if (document.querySelector('#customer-phone')) {
+                    document.querySelector('#customer-phone').textContent = ticket.customer.phone_number || 'N/A';
+                }
+            }
+            
+            // Update journey details
+            if (ticket.route) {
+                document.querySelector('#journey-from').textContent = ticket.route.source;
+                document.querySelector('#journey-to').textContent = ticket.route.destination;
+                document.querySelector('#route-name').textContent = ticket.route.name;
+            }
+            
+            // Update vehicle and seat
+            if (ticket.vehicle) {
+                document.querySelector('#vehicle-name').textContent = ticket.vehicle.name;
+                if (document.querySelector('#vehicle-number')) {
+                    document.querySelector('#vehicle-number').textContent = ticket.vehicle.registration_number || 'N/A';
+                }
+            }
+            
+            if (ticket.seat) {
+                document.querySelector('#seat-number').textContent = ticket.seat.seat_number;
+            }
+            
+            // Update dates and times
+            if (ticket.schedule) {
+                if (ticket.schedule.departure_time) {
+                    const departureDate = new Date(ticket.schedule.departure_time);
+                    document.querySelector('#departure-date').textContent = departureDate.toLocaleDateString('en-US', {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'});
+                    document.querySelector('#departure-time').textContent = departureDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
+                
+                if (ticket.schedule.arrival_time) {
+                    const arrivalDate = new Date(ticket.schedule.arrival_time);
+                    document.querySelector('#arrival-date').textContent = arrivalDate.toLocaleDateString('en-US', {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'});
+                    document.querySelector('#arrival-time').textContent = arrivalDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
+            }
+            
+            // Update pricing information
+            if (ticket.pricing) {
+                document.querySelector('#base-price').textContent = 'Rs. ' + ticket.pricing.base_price.toFixed(2);
+                document.querySelector('#discount').textContent = 'Rs. ' + ticket.pricing.discount_amount.toFixed(2);
+                document.querySelector('#final-price').textContent = 'Rs. ' + ticket.pricing.final_price.toFixed(2);
+            }
+            
+            // Update status
+            const statusBadge = document.querySelector('.status-badge');
+            if (statusBadge) {
+                statusBadge.textContent = ticket.status;
+                statusBadge.className = 'status-badge status-' + ticket.status.toLowerCase();
+            }
+            
+            // Update booking time
+            if (ticket.booking_time) {
+                const bookingDate = new Date(ticket.booking_time);
+                document.querySelector('#booking-time').textContent = bookingDate.toLocaleString();
+            }
+            
+            // Update barcode data
+            if (document.querySelector('#barcode-data')) {
+                document.querySelector('#barcode-data').textContent = 'T' + ticket.id;
+            }
+        }
+        
+        // Function to show error message
+        function showErrorMessage(message) {
+            const ticketBody = document.querySelector('.ticket-body');
+            if (ticketBody) {
+                ticketBody.innerHTML = `
+                    <div style="text-align: center; padding: 50px 0;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: #dc3545; margin-bottom: 20px;"></i>
+                        <h3>${message}</h3>
+                        <p>Please try again later or contact support.</p>
+                        <a href="/dashboard/regular-tickets/" class="btn filter-btn mt-4">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Tickets List
+                        </a>
+                    </div>
+                `;
+            }
+        }
+    });
 </script>
-{% endblock %} 
+{% endblock %}

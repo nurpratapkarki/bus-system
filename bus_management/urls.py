@@ -17,6 +17,13 @@ router.register(r'seats', SeatViewSet)
 router.register(r'seat-availabilities', SeatAvailabilityViewSet)
 router.register(r'customers', CustomerViewSet)
 router.register(r'offers', OfferViewSet)
+
+# The Ticket model uses UUID as primary key instead of regular auto-incrementing ID
+# This provides several benefits:
+# 1. Security - UUIDs are not sequential and harder to guess
+# 2. Distributed systems - UUIDs can be generated without a central authority
+# 3. Uniqueness - UUIDs are globally unique across systems
+# 4. URL-friendly - UUIDs can be used in URLs without encoding
 router.register(r'tickets', TicketViewSet)
 router.register(r'special-reservations', SpecialReservationViewSet)
 
@@ -60,4 +67,12 @@ urlpatterns = [
     path('api/special-reservations/<uuid:pk>/complete/', 
          SpecialReservationViewSet.as_view({'post': 'mark_completed'}), 
          name='complete-special-reservation'),
+    
+    # Add custom ticket endpoints  
+    path('api/tickets/my-tickets/', 
+         TicketViewSet.as_view({'get': 'my_tickets'}), 
+         name='my-tickets'),
+    path('api/tickets/<uuid:pk>/cancel/', 
+         TicketViewSet.as_view({'post': 'cancel_ticket'}), 
+         name='cancel-ticket'),
 ] 

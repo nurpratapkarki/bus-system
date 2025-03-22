@@ -602,6 +602,8 @@ urlpatterns = [
     path('api/v1/dashboard/', api.dashboard_data, name='api_dashboard'),
     path('api/v1/dashboard/charts/', api.dashboard_charts, name='api_dashboard_charts'),  
     path('api/v1/notifications/', api.notifications_data, name='api_notifications'),
+    path('api/v1/tickets/', api.tickets_data, name='api_tickets'),
+    path('api/v1/tickets/<uuid:ticket_id>/', api.ticket_detail, name='api_ticket_detail'),
     
     # Admin URLs
     path('', admin.site.urls),

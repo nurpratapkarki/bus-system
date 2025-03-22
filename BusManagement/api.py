@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from bus_management.models import (
@@ -208,5 +209,163 @@ def notifications_data(request):
         logger.error(traceback.format_exc())
         return JsonResponse(
             {"error": "An error occurred while retrieving notifications"},
+            status=500
+        )
+
+def tickets_data(request):
+    """
+    API endpoint for regular tickets data
+    """
+    logger.info("Regular tickets API called")
+    
+    try:
+        # Get parameters for filtering
+        status_filter = request.GET.get('status', '')
+        search_query = request.GET.get('search', '')
+        
+        # Get date range filters
+        date_from = request.GET.get('date_from', '')
+        date_to = request.GET.get('date_to', '')
+        
+        # Start with all tickets
+        tickets_query = Ticket.objects.all().order_by('-booking_time')
+        
+        # Apply status filter if provided
+        if status_filter:
+            tickets_query = tickets_query.filter(status=status_filter)
+        
+        # Apply search filter if provided
+        if search_query:
+            tickets_query = tickets_query.filter(
+                Q(customer__username__icontains=search_query) |
+                Q(customer__email__icontains=search_query) |
+                Q(customer__first_name__icontains=search_query) |
+                Q(customer__last_name__icontains=search_query) |
+                Q(schedule__vehicle__name__icontains=search_query) |
+                Q(schedule__route__source__icontains=search_query) |
+                Q(schedule__route__destination__icontains=search_query)
+            )
+        
+        # Apply date filters if provided
+        if date_from:
+            try:
+                from datetime import datetime
+                date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+                tickets_query = tickets_query.filter(booking_time__gte=date_from_obj)
+            except (ValueError, TypeError):
+                pass
+        
+        if date_to:
+            try:
+                from datetime import datetime
+                date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+                date_to_obj = date_to_obj.replace(hour=23, minute=59, second=59)
+                tickets_query = tickets_query.filter(booking_time__lte=date_to_obj)
+            except (ValueError, TypeError):
+                pass
+        
+        # Format tickets for the response
+        tickets_data = []
+        for ticket in tickets_query:
+            ticket_data = {
+                'id': str(ticket.id),
+                'customer_name': f"{ticket.customer.first_name} {ticket.customer.last_name}" if ticket.customer else "Not Available",
+                'vehicle_name': ticket.schedule.vehicle.name if ticket.schedule and ticket.schedule.vehicle else "Not Available",
+                'seat_number': ticket.seat.seat_number if ticket.seat and hasattr(ticket.seat, 'seat_number') else "Not Available",
+                'route': {
+                    'source': ticket.schedule.route.source if ticket.schedule and ticket.schedule.route else "Not Available",
+                    'destination': ticket.schedule.route.destination if ticket.schedule and ticket.schedule.route else "Not Available",
+                    'name': ticket.schedule.route.name if ticket.schedule and ticket.schedule.route else "Not Available",
+                },
+                'departure_time': ticket.schedule.departure_time.isoformat() if ticket.schedule and ticket.schedule.departure_time else None,
+                'arrival_time': ticket.schedule.arrival_time.isoformat() if ticket.schedule and ticket.schedule.arrival_time else None,
+                'status': ticket.status,
+                'base_price': float(ticket.base_price) if ticket.base_price else 0,
+                'discount_amount': float(ticket.discount_amount) if ticket.discount_amount else 0,
+                'final_price': float(ticket.final_price) if ticket.final_price else 0,
+                'booking_time': ticket.booking_time.isoformat() if ticket.booking_time else None,
+            }
+            tickets_data.append(ticket_data)
+        
+        # Get all possible status values
+        status_choices = [choice[0] for choice in Ticket._meta.get_field('status').choices]
+        
+        response_data = {
+            'tickets': tickets_data,
+            'status_choices': status_choices,
+            'timestamp': timezone.now().isoformat()
+        }
+        
+        logger.info("Regular tickets API completed successfully")
+        return JsonResponse(response_data)
+        
+    except Exception as e:
+        logger.error(f"Error in regular tickets API: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JsonResponse(
+            {"error": "An error occurred while retrieving ticket data"},
+            status=500
+        )
+
+def ticket_detail(request, ticket_id):
+    """
+    API endpoint for retrieving a specific ticket's details
+    """
+    logger.info(f"Ticket detail API called for ticket_id: {ticket_id}")
+    
+    try:
+        # Get the ticket by ID (using UUID)
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+        
+        # Format ticket data
+        ticket_data = {
+            'id': str(ticket.id),
+            'customer': {
+                'id': str(ticket.customer.id) if ticket.customer else None,
+                'name': f"{ticket.customer.first_name} {ticket.customer.last_name}" if ticket.customer else "Not Available",
+                'username': ticket.customer.username if ticket.customer else None,
+                'email': ticket.customer.email if ticket.customer else None,
+                'phone_number': ticket.customer.phone_number if ticket.customer else None,
+            },
+            'schedule': {
+                'id': str(ticket.schedule.id) if ticket.schedule else None,
+                'departure_time': ticket.schedule.departure_time.isoformat() if ticket.schedule and ticket.schedule.departure_time else None,
+                'arrival_time': ticket.schedule.arrival_time.isoformat() if ticket.schedule and ticket.schedule.arrival_time else None,
+            },
+            'vehicle': {
+                'name': ticket.schedule.vehicle.name if ticket.schedule and ticket.schedule.vehicle else "Not Available",
+                'registration_number': ticket.schedule.vehicle.registration_number if ticket.schedule and ticket.schedule.vehicle else None,
+            },
+            'route': {
+                'name': ticket.schedule.route.name if ticket.schedule and ticket.schedule.route else "Not Available",
+                'source': ticket.schedule.route.source if ticket.schedule and ticket.schedule.route else "Not Available",
+                'destination': ticket.schedule.route.destination if ticket.schedule and ticket.schedule.route else "Not Available",
+                'distance_km': float(ticket.schedule.route.distance_km) if ticket.schedule and ticket.schedule.route and ticket.schedule.route.distance_km else 0,
+            },
+            'seat': {
+                'seat_number': ticket.seat.seat_number if ticket.seat and hasattr(ticket.seat, 'seat_number') else "Not Available",
+                'seat_type': ticket.seat.seat_type if ticket.seat else None,
+            },
+            'pricing': {
+                'base_price': float(ticket.base_price) if ticket.base_price else 0,
+                'discount_amount': float(ticket.discount_amount) if ticket.discount_amount else 0,
+                'final_price': float(ticket.final_price) if ticket.final_price else 0,
+            },
+            'status': ticket.status,
+            'booking_time': ticket.booking_time.isoformat() if ticket.booking_time else None,
+            'created_at': ticket.created_at.isoformat() if ticket.created_at else None,
+            'updated_at': ticket.updated_at.isoformat() if ticket.updated_at else None,
+        }
+        
+        logger.info("Ticket detail API completed successfully")
+        return JsonResponse(ticket_data)
+        
+    except Exception as e:
+        logger.error(f"Error in ticket detail API: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JsonResponse(
+            {"error": "An error occurred while retrieving ticket details"},
             status=500
         ) 
