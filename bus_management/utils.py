@@ -108,55 +108,109 @@ def calculate_arrival_time(departure_time, distance_km):
 def broadcast_vehicle_status_update(vehicle_id, status):
     """
     Broadcast vehicle status updates to WebSocket clients.
+    Will fail gracefully if Redis is not available.
     """
-    channel_layer = get_channel_layer()
-    group_name = f'vehicle_{vehicle_id}'
-    
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            'type': 'status_update',
-            'vehicle_id': str(vehicle_id),
-            'status': status,
-            'timestamp': timezone.now().isoformat()
-        }
-    )
+    try:
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        
+        channel_layer = get_channel_layer()
+        if channel_layer is None:
+            # Channel layer not configured
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("Channel layer not configured, skipping broadcast")
+            return
+            
+        group_name = 'vehicle_status'
+        
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'vehicle_update',
+                'vehicle_id': str(vehicle_id),
+                'status': status,
+                'timestamp': timezone.now().isoformat()
+            }
+        )
+    except Exception as e:
+        # Log the error but don't let it break the application
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error broadcasting vehicle status update: {str(e)}")
+        # Continue with normal operation even if broadcast fails
 
 
 def broadcast_schedule_status_update(schedule_id, status):
     """
     Broadcast schedule status updates to WebSocket clients.
+    Will fail gracefully if Redis is not available.
     """
-    channel_layer = get_channel_layer()
-    group_name = f'schedule_{schedule_id}'
-    
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            'type': 'status_update',
-            'schedule_id': str(schedule_id),
-            'status': status,
-            'timestamp': timezone.now().isoformat()
-        }
-    )
+    try:
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        
+        channel_layer = get_channel_layer()
+        if channel_layer is None:
+            # Channel layer not configured
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("Channel layer not configured, skipping broadcast")
+            return
+            
+        group_name = 'schedule_status'
+        
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'schedule_update',
+                'schedule_id': str(schedule_id),
+                'status': status,
+                'timestamp': timezone.now().isoformat()
+            }
+        )
+    except Exception as e:
+        # Log the error but don't let it break the application
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error broadcasting schedule status update: {str(e)}")
+        # Continue with normal operation even if broadcast fails
 
 
 def broadcast_seat_status_update(schedule_id, seat_id, status):
     """
     Broadcast seat availability updates to WebSocket clients.
+    Will fail gracefully if Redis is not available.
     """
-    channel_layer = get_channel_layer()
-    group_name = f'seat_availability_{schedule_id}'
-    
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            'type': 'seat_update',
-            'seat_id': str(seat_id),
-            'status': status,
-            'timestamp': timezone.now().isoformat()
-        }
-    )
+    try:
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        
+        channel_layer = get_channel_layer()
+        if channel_layer is None:
+            # Channel layer not configured
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("Channel layer not configured, skipping broadcast")
+            return
+            
+        group_name = f'seat_availability_{schedule_id}'
+        
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'seat_update',
+                'seat_id': str(seat_id),
+                'status': status,
+                'timestamp': timezone.now().isoformat()
+            }
+        )
+    except Exception as e:
+        # Log the error but don't let it break the application
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error broadcasting seat status update: {str(e)}")
+        # Continue with normal operation even if broadcast fails
 
 
 def create_vehicle_with_seats(name, registration_number, capacity, vehicle_subtype, existing_vehicle=None):
@@ -318,4 +372,23 @@ def get_sales_analytics(start_date=None, end_date=None):
         'total_cancellations': total_cancellations,
         'cancellation_rate': cancellation_rate,
         'top_routes': top_routes
-    } 
+    }
+
+
+class CorsMiddleware:
+    """
+    Middleware to add CORS headers to API responses
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        
+        # Add CORS headers to all responses
+        if 'api' in request.path or 'dashboard' in request.path:
+            response["Access-Control-Allow-Origin"] = "*"
+            response["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+            response["Access-Control-Allow-Headers"] = "Content-Type, X-CSRFToken, Authorization"
+        
+        return response 

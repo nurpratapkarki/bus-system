@@ -23,6 +23,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from . import api
 
 # Simple dashboard view
 @login_required
@@ -31,7 +32,6 @@ def dashboard_view(request):
     Renders the dashboard template with admin context
     """
     from django.contrib.admin.sites import site
-    from django.conf import settings
     
     context = {
         'title': 'Dashboard',
@@ -63,6 +63,11 @@ schema_view = get_schema_view(
 urlpatterns = [
     # Dashboard must come before admin to prevent admin catch-all from capturing it
     path('dashboard/', dashboard_view, name='admin_dashboard'),
+    
+    # New unified API endpoints
+    path('api/v1/dashboard/', api.dashboard_data, name='api_dashboard'),
+    path('api/v1/dashboard/charts/', api.dashboard_charts, name='api_dashboard_charts'),  
+    path('api/v1/notifications/', api.notifications_data, name='api_notifications'),
     
     # Admin URLs
     path('', admin.site.urls),

@@ -105,24 +105,32 @@ def update_vehicle_status_for_special_reservation(sender, instance, created, **k
     """
     Signal to update vehicle status when a special reservation is created, approved, or cancelled.
     """
-    vehicle = instance.vehicle
+    from django.db import transaction
     
-    # If special reservation is approved, mark vehicle as reserved
-    if instance.status == 'APPROVED':
-        vehicle.status = 'RESERVED'
-        vehicle.save()
-    # If special reservation is cancelled or rejected, check if other active reservations exist
-    elif instance.status in ['CANCELLED', 'REJECTED', 'COMPLETED']:
-        # Check if there are other active special reservations for this vehicle
-        active_reservations = SpecialReservation.objects.filter(
-            vehicle=vehicle,
-            status='APPROVED'
-        ).exclude(id=instance.id).exists()
-        
-        # If no other active reservations, set vehicle status back to active
-        if not active_reservations:
-            vehicle.status = 'ACTIVE'
-            vehicle.save()
+    try:
+        with transaction.atomic():
+            vehicle = instance.vehicle
+            
+            # If special reservation is approved, mark vehicle as reserved
+            if instance.status == 'APPROVED':
+                vehicle.status = 'RESERVED'
+                vehicle.save(update_fields=['status'])
+            # If special reservation is cancelled or rejected, check if other active reservations exist
+            elif instance.status in ['CANCELLED', 'REJECTED', 'COMPLETED']:
+                # Check if there are other active special reservations for this vehicle
+                active_reservations = SpecialReservation.objects.filter(
+                    vehicle=vehicle,
+                    status='APPROVED'
+                ).exclude(id=instance.id).exists()
+                
+                # If no other active reservations, set vehicle status back to active
+                if not active_reservations:
+                    vehicle.status = 'ACTIVE'
+                    vehicle.save(update_fields=['status'])
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error updating vehicle status for special reservation {instance.id}: {e}")
 
 @receiver(pre_save, sender=Schedule)
 def check_completed_schedule(sender, instance, **kwargs):

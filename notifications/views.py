@@ -51,28 +51,17 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
                 'title': notification.title,
                 'message': notification.message,
                 'is_read': notification.is_read,
-                'created_at': notification.created_at.isoformat(),
+                'created_at': notification.created_at.isoformat() if notification.created_at else None,
+                'related_object_id': str(notification.related_object_id) if notification.related_object_id else None,
+                'related_object_type': notification.related_object_type,
             })
-        
-        # Get unread count - determine the recipient
-        if hasattr(request, 'user') and not request.user.is_anonymous:
-            recipient = request.user
-        elif hasattr(request.auth, 'payload') and request.auth.payload.get('customer_id'):
-            customer_id = request.auth.payload.get('customer_id')
-            try:
-                recipient = Customer.objects.get(id=customer_id)
-            except Customer.DoesNotExist:
-                recipient = None
-        else:
-            recipient = None
             
-        unread_count = get_unread_count(recipient) if recipient else 0
-        
-        return Response({
-            'count': len(notifications),
-            'unread_count': unread_count,
-            'results': notifications,
-        })
+        # Add CORS headers to allow requests from the dashboard page
+        response = Response(notifications)
+        response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Content-Type, X-CSRFToken"
+        return response
     
     @action(detail=True, methods=['post'])
     def mark_read(self, request, pk=None):

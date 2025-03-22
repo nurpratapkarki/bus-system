@@ -180,7 +180,8 @@ class Route(models.Model):
     source = models.CharField(max_length=100)
     destination = models.CharField(max_length=100)
     distance_km = models.DecimalField(max_digits=8, decimal_places=2)
-    estimated_duration_minutes = models.PositiveIntegerField()    
+    estimated_duration_minutes = models.PositiveIntegerField()
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

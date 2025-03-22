@@ -7,52 +7,253 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
+    :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --success-color: #4cc9f0;
+        --info-color: #4895ef;
+        --warning-color: #f72585;
+        --danger-color: #7209b7;
+        --light-color: #f8f9fa;
+        --dark-color: #212529;
+        --text-color: #495057;
+        --bg-color: #f4f6f9;
+        --card-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
     .dashboard-container {
-        padding: 20px;
+        padding: 25px;
+        max-width: 1400px;
+        margin: 0 auto;
     }
+
+    .page-header {
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+
+    .page-header h1 {
+        font-weight: 600;
+        color: var(--dark-color);
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+    }
+
+    .page-header p {
+        color: #6c757d;
+        font-size: 1.05rem;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 4px;
+        width: 60px;
+        background: var(--primary-color);
+        border-radius: 2px;
+    }
+
     .card {
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-        transition: transform 0.3s;
+        border: none;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 25px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        overflow: hidden;
     }
+
     .card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
     }
+
     .card-header {
-        border-radius: 10px 10px 0 0 !important;
-        font-weight: bold;
+        border-bottom: none !important;
+        background-color: white !important;
+        padding: 20px 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
     }
+    
+    .card-header i {
+        margin-right: 12px;
+        font-size: 1.2rem;
+    }
+    
+    .card-header.bg-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+        color: white !important;
+    }
+
+    .card-body {
+        padding: 25px;
+    }
+
     .stat-card {
         text-align: center;
-        padding: 20px;
+        padding: 25px 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
     }
+
     .stat-icon {
-        font-size: 3rem;
+        font-size: 2.5rem;
         margin-bottom: 15px;
-        color: #4e73df;
+        background: rgba(255, 255, 255, 0.2);
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin-bottom: 15px;
     }
+
     .stat-value {
-        font-size: 2rem;
-        font-weight: bold;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        line-height: 1;
     }
+
     .stat-label {
-        color: #5a5c69;
         font-size: 1rem;
+        font-weight: 500;
+        opacity: 0.9;
     }
+
     .chart-container {
-        height: 300px;
+        height: 320px;
+        position: relative;
     }
+
+    .table {
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+    
     .table th {
-        font-weight: bold;
+        font-weight: 600;
+        color: #495057;
+        border: none;
+        background-color: #f8f9fa;
+        padding: 12px 15px;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
+    
+    .table td {
+        padding: 12px 15px;
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f4;
+        font-size: 0.95rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+    
+    .id-cell {
+        font-family: monospace;
+        font-size: 0.8rem;
+        background-color: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 4px;
+        color: #555;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 80px;
+        display: inline-block;
+    }
+    
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .status-pending {
+        background-color: rgba(251, 133, 0, 0.15);
+        color: #fb8500;
+    }
+    
+    .status-approved, .status-confirmed {
+        background-color: rgba(0, 180, 216, 0.15);
+        color: #00b4d8;
+    }
+    
+    .status-completed {
+        background-color: rgba(43, 147, 72, 0.15);
+        color: #2b9348;
+    }
+    
+    .status-cancelled, .status-rejected {
+        background-color: rgba(247, 37, 133, 0.15);
+        color: #f72585;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .price-cell {
+        font-weight: 600;
+        color: #2b9348;
+    }
+    
     .notification-item {
-        padding: 10px;
-        border-bottom: 1px solid #e3e6f0;
+        padding: 15px;
+        border-bottom: 1px solid #f1f3f4;
+        transition: background-color 0.2s;
+        animation: fadeIn 0.5s ease-in;
     }
+    
     .notification-item:last-child {
         border-bottom: none;
     }
+    
+    .notification-item:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+
     .notification-icon {
         width: 40px;
         height: 40px;
@@ -60,69 +261,177 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        background-color: #4e73df;
-        color: white;
         margin-right: 15px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        font-size: 0.9rem;
     }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 3px;
+        font-size: 0.95rem;
+    }
+
+    .notification-message {
+        color: var(--text-color);
+        margin-bottom: 3px;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
     .notification-time {
         color: #858796;
         font-size: 0.8rem;
     }
+    
     .loading {
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 200px;
     }
+    
     .spinner-border {
         width: 3rem;
         height: 3rem;
+        color: var(--primary-color);
+    }
+    
+    .spinner-text {
+        margin-top: 15px;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .bg-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    }
+    
+    .bg-success {
+        background: linear-gradient(135deg, #2b9348, #55a630) !important;
+    }
+    
+    .bg-info {
+        background: linear-gradient(135deg, #00b4d8, #0077b6) !important;
+    }
+    
+    .bg-warning {
+        background: linear-gradient(135deg, #ffc300, #fb8500) !important;
+    }
+    
+    .btn-primary {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.375rem 1rem;
+        border-radius: 6px;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+        background: var(--secondary-color);
+        border-color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    /* Animation classes */
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Custom scrollbar for notifications */
+    #notifications-list {
+        max-height: 460px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(67, 97, 238, 0.3) transparent;
+    }
+    
+    #notifications-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    #notifications-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    #notifications-list::-webkit-scrollbar-thumb {
+        background-color: rgba(67, 97, 238, 0.3);
+        border-radius: 3px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1>Dashboard</h1>
-            <p class="text-muted">Welcome to the Bus Management System dashboard.</p>
-        </div>
+    <div class="page-header">
+        <h1 class="animate-fade-in">Bus Management Dashboard</h1>
+        <p class="text-muted animate-fade-in">Welcome to your centralized command center</p>
     </div>
 
     <!-- Statistics Cards -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6">
-            <div class="card bg-primary text-white">
+            <div class="card bg-primary text-white animate-fade-in" style="animation-delay: 0.1s">
                 <div class="card-body stat-card">
-                    <i class="fas fa-bus stat-icon"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-bus"></i>
+                    </div>
                     <div class="stat-value" id="total-vehicles">0</div>
                     <div class="stat-label">Total Vehicles</div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card bg-success text-white">
+            <div class="card bg-success text-white animate-fade-in" style="animation-delay: 0.2s">
                 <div class="card-body stat-card">
-                    <i class="fas fa-route stat-icon"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
                     <div class="stat-value" id="total-routes">0</div>
                     <div class="stat-label">Active Routes</div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card bg-info text-white">
+            <div class="card bg-info text-white animate-fade-in" style="animation-delay: 0.3s">
                 <div class="card-body stat-card">
-                    <i class="fas fa-ticket-alt stat-icon"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
                     <div class="stat-value" id="total-tickets">0</div>
                     <div class="stat-label">Tickets Sold Today</div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card bg-warning text-white">
+            <div class="card bg-warning text-white animate-fade-in" style="animation-delay: 0.4s">
                 <div class="card-body stat-card">
-                    <i class="fas fa-bookmark stat-icon"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
                     <div class="stat-value" id="total-reservations">0</div>
                     <div class="stat-label">Special Reservations</div>
                 </div>
@@ -133,9 +442,9 @@
     <!-- Charts -->
     <div class="row mb-4">
         <div class="col-xl-8">
-            <div class="card">
+            <div class="card animate-fade-in" style="animation-delay: 0.5s">
                 <div class="card-header bg-primary text-white">
-                    <i class="fas fa-chart-line mr-2"></i> Revenue Trends
+                    <i class="fas fa-chart-line"></i> Revenue Trends
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
@@ -145,9 +454,9 @@
             </div>
         </div>
         <div class="col-xl-4">
-            <div class="card">
+            <div class="card animate-fade-in" style="animation-delay: 0.6s">
                 <div class="card-header bg-primary text-white">
-                    <i class="fas fa-chart-pie mr-2"></i> Ticket Distribution
+                    <i class="fas fa-chart-pie"></i> Ticket Distribution
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
@@ -161,30 +470,32 @@
     <!-- Recent Activities & Notifications -->
     <div class="row">
         <div class="col-xl-8">
-            <div class="card">
+            <div class="card animate-fade-in" style="animation-delay: 0.7s">
                 <div class="card-header bg-primary text-white">
-                    <i class="fas fa-list mr-2"></i> Recent Special Reservations
+                    <i class="fas fa-list"></i> Recent Special Reservations
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
+                        <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th style="width: 80px">ID</th>
                                     <th>Customer</th>
                                     <th>Vehicle</th>
                                     <th>Start Date</th>
                                     <th>Status</th>
                                     <th>Price</th>
+                                    <th style="width: 50px">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="recent-reservations">
                                 <tr>
-                                    <td colspan="6" class="text-center">
+                                    <td colspan="7" class="text-center">
                                         <div class="loading">
-                                            <div class="spinner-border text-primary" role="status">
+                                            <div class="spinner-border" role="status">
                                                 <span class="visually-hidden">Loading...</span>
                                             </div>
+                                            <div class="spinner-text">Loading reservation data...</div>
                                         </div>
                                     </td>
                                 </tr>
@@ -195,16 +506,17 @@
             </div>
         </div>
         <div class="col-xl-4">
-            <div class="card">
+            <div class="card animate-fade-in" style="animation-delay: 0.8s">
                 <div class="card-header bg-primary text-white">
-                    <i class="fas fa-bell mr-2"></i> Recent Notifications
+                    <i class="fas fa-bell"></i> Recent Notifications
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div id="notifications-list">
                         <div class="loading">
-                            <div class="spinner-border text-primary" role="status">
+                            <div class="spinner-border" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
+                            <div class="spinner-text">Loading notifications...</div>
                         </div>
                     </div>
                 </div>
@@ -216,166 +528,311 @@
 
 {% block extrajs %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Helper function to display error messages
-    function showError(containerId, message) {
-        const container = document.getElementById(containerId);
-        if (container) {
-            container.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-        console.error(message);
+        return cookieValue;
     }
-
-    // Helper function to update dashboard stats
+    const csrftoken = getCookie('csrftoken');
+    
+    // Format dates
+    function formatDateTime(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        } catch (e) {
+            console.error("Date formatting error:", e);
+            return 'Invalid date';
+        }
+    }
+    
+    // Show error message
+    function showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            if (element.tagName === 'CANVAS') {
+                // For chart canvases
+                const container = element.parentElement;
+                container.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+            } else {
+                // For other elements
+                element.innerHTML = `<div class="alert alert-danger">${message}</div>`;
+            }
+        } else {
+            console.error(`Element with ID ${elementId} not found for error display`);
+        }
+    }
+    
+    // Add animation to numbers in stats cards
+    function animateValue(element, start, end, duration) {
+        if (start === end) return;
+        const range = end - start;
+        let current = start;
+        const increment = end > start ? 1 : -1;
+        const stepTime = Math.abs(Math.floor(duration / range));
+        const timer = setInterval(function() {
+            current += increment;
+            element.textContent = current;
+            if (current == end) {
+                clearInterval(timer);
+            }
+        }, stepTime);
+    }
+    
+    // Update dashboard statistics
     function updateDashboardStats(data) {
         try {
-            document.getElementById('total-vehicles').textContent = data.total_vehicles || 0;
-            document.getElementById('total-routes').textContent = data.total_routes || 0;
-            document.getElementById('total-tickets').textContent = data.tickets_today || 0;
-            document.getElementById('total-reservations').textContent = data.special_reservations || 0;
+            const totalVehiclesElement = document.getElementById('total-vehicles');
+            const totalRoutesElement = document.getElementById('total-routes');
+            const totalTicketsElement = document.getElementById('total-tickets');
+            const totalReservationsElement = document.getElementById('total-reservations');
+            
+            animateValue(totalVehiclesElement, 0, data.total_vehicles || 0, 1500);
+            animateValue(totalRoutesElement, 0, data.total_routes || 0, 1500);
+            animateValue(totalTicketsElement, 0, data.tickets_today || 0, 1500);
+            animateValue(totalReservationsElement, 0, data.special_reservations || 0, 1500);
+            
             console.log("Dashboard stats updated successfully");
         } catch (error) {
             console.error("Error updating dashboard stats:", error);
         }
     }
-
-    // Helper function to update recent reservations
+    
+    // Update recent reservations table
     function updateRecentReservations(reservations) {
-        const reservationsTable = document.getElementById('recent-reservations');
-        if (!reservationsTable) {
-            console.error("Reservation table element not found");
-            return;
-        }
-        
-        if (!reservations || !Array.isArray(reservations) || reservations.length === 0) {
-            reservationsTable.innerHTML = '<tr><td colspan="6" class="text-center">No recent reservations</td></tr>';
-            return;
-        }
-        
         try {
+            const reservationsTable = document.getElementById('recent-reservations');
+            if (!reservationsTable) {
+                console.error("Reservations table element not found");
+                return;
+            }
+            
+            if (!reservations || !Array.isArray(reservations) || reservations.length === 0) {
+                reservationsTable.innerHTML = '<tr><td colspan="7" class="text-center">No recent reservations found</td></tr>';
+                return;
+            }
+            
             reservationsTable.innerHTML = '';
-            reservations.forEach(reservation => {
-                if (!reservation) return;
+            
+            reservations.forEach((reservation, index) => {
+                // Truncate the UUID to first 8 characters
+                const truncatedId = reservation.id.substring(0, 8);
                 
-                const id = reservation.id ? reservation.id.substring(0, 8) + '...' : 'N/A';
-                const customerName = reservation.customer_name || 'N/A';
-                const vehicleName = reservation.vehicle_name || 'Not assigned';
-                const startDate = formatDate(reservation.start_time);
-                const status = reservation.status || 'Unknown';
-                const statusClass = getStatusClass(status);
-                const price = reservation.final_price != null ? reservation.final_price : 0;
+                const statusClass = {
+                    'REQUESTED': 'status-pending',
+                    'PENDING': 'status-pending',
+                    'APPROVED': 'status-approved',
+                    'CONFIRMED': 'status-confirmed',
+                    'COMPLETED': 'status-completed',
+                    'CANCELLED': 'status-cancelled',
+                    'REJECTED': 'status-rejected'
+                }[reservation.status.toUpperCase()] || '';
+                
+                const delay = index * 100;
                 
                 reservationsTable.innerHTML += `
-                    <tr>
-                        <td>${id}</td>
-                        <td>${customerName}</td>
-                        <td>${vehicleName}</td>
-                        <td>${startDate}</td>
-                        <td><span class="badge ${statusClass}">${status}</span></td>
-                        <td>₹${price}</td>
+                    <tr class="animate-fade-in" style="animation-delay: ${delay}ms">
+                        <td><span class="id-cell" title="${reservation.id}">${truncatedId}</span></td>
+                        <td>${reservation.customer_name}</td>
+                        <td>${reservation.vehicle_name}</td>
+                        <td>${formatDateTime(reservation.start_time)}</td>
+                        <td><span class="status-badge ${statusClass}">${reservation.status}</span></td>
+                        <td class="price-cell">Rs. ${parseFloat(reservation.final_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td>
+                            <a href="/admin/bus_management/specialreservation/${reservation.id}/change/" 
+                               class="btn btn-sm btn-primary action-btn" 
+                               title="View details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
                     </tr>
                 `;
             });
             console.log("Recent reservations updated successfully");
         } catch (error) {
             console.error("Error updating recent reservations:", error);
-            reservationsTable.innerHTML = '<tr><td colspan="6" class="text-center">Error loading reservation data</td></tr>';
+            reservationsTable.innerHTML = '<tr><td colspan="7" class="text-center">Error loading reservation data</td></tr>';
         }
     }
 
     // Fetch dashboard data
-    fetch('/api/dashboard/')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Dashboard data received:", data);
-            
-            // Update statistics
-            updateDashboardStats(data);
-            
-            // Update recent reservations
-            updateRecentReservations(data.recent_reservations);
-            
-            // Load chart data
-            loadCharts();
-        })
-        .catch(error => {
-            console.error('Error fetching dashboard data:', error);
-            showError('recent-reservations', 'Failed to load dashboard data. Please try refreshing the page.');
-        });
+    fetch('/api/v1/dashboard/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.error(`HTTP error! Status: ${response.status}`);
+            return response.text().then(text => {
+                throw new Error(`HTTP error! Status: ${response.status}, Response: ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Dashboard data received:", data);
+        
+        // Update statistics
+        updateDashboardStats(data);
+        
+        // Update recent reservations
+        updateRecentReservations(data.recent_reservations);
+        
+        // Load chart data
+        loadCharts();
+    })
+    .catch(error => {
+        console.error('Error fetching dashboard data:', error);
+        showError('recent-reservations', 'Failed to load dashboard data. Please try refreshing the page.');
+        
+        // Set default values for stats in case of error
+        document.getElementById('total-vehicles').textContent = '0';
+        document.getElementById('total-routes').textContent = '0';
+        document.getElementById('total-tickets').textContent = '0';
+        document.getElementById('total-reservations').textContent = '0';
+        
+        // Try loading charts anyway
+        loadCharts();
+    });
     
     // Fetch notifications
-    fetch('/notifications/api/notifications/')
+    fetch('/api/v1/notifications/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.error(`HTTP error! Status: ${response.status}`);
+            return response.text().then(text => {
+                throw new Error(`HTTP error! Status: ${response.status}, Response: ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Notifications data received:", data);
+        const notificationsList = document.getElementById('notifications-list');
+        if (!notificationsList) {
+            console.error("Notifications list element not found");
+            return;
+        }
+        
+        if (data && Array.isArray(data) && data.length > 0) {
+            notificationsList.innerHTML = '';
+            data.forEach((notification, index) => {
+                // Get icon based on notification type
+                let icon = 'bell';
+                if (notification.type === 'RESERVATION_STATUS') {
+                    icon = 'bookmark';
+                } else if (notification.type === 'TICKET_STATUS') {
+                    icon = 'ticket-alt';
+                } else if (notification.type === 'VEHICLE_STATUS') {
+                    icon = 'bus';
+                } else if (notification.type === 'PAYMENT') {
+                    icon = 'credit-card';
+                }
+                
+                // Format time as relative time
+                const timeAgo = getTimeAgo(notification.created_at);
+                
+                notificationsList.innerHTML += `
+                    <div class="notification-item d-flex align-items-start" style="animation-delay: ${index * 100}ms">
+                        <div class="notification-icon">
+                            <i class="fas fa-${icon}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">${notification.title || 'Notification'}</div>
+                            <div class="notification-message">${notification.message || 'No message'}</div>
+                            <div class="notification-time">${timeAgo}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            notificationsList.innerHTML = '<div class="text-center p-4">No new notifications</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching notifications:', error);
+        const notificationsList = document.getElementById('notifications-list');
+        if (notificationsList) {
+            notificationsList.innerHTML = '<div class="text-center p-4">Failed to load notifications</div>';
+        }
+    });
+    
+    // Add helper function for relative time
+    function getTimeAgo(dateString) {
+        if (!dateString) return 'Unknown time';
+        
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffSec = Math.round(diffMs / 1000);
+        const diffMin = Math.round(diffSec / 60);
+        const diffHour = Math.round(diffMin / 60);
+        const diffDay = Math.round(diffHour / 24);
+        
+        if (diffSec < 60) {
+            return 'Just now';
+        } else if (diffMin < 60) {
+            return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
+        } else if (diffHour < 24) {
+            return `${diffHour} hour${diffHour > 1 ? 's' : ''} ago`;
+        } else if (diffDay < 7) {
+            return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`;
+        } else {
+            return date.toLocaleDateString();
+        }
+    }
+    
+    function loadCharts() {
+        fetch('/api/v1/dashboard/charts/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                console.error(`HTTP error! Status: ${response.status}`);
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! Status: ${response.status}, Response: ${text}`);
+                });
             }
             return response.json();
         })
         .then(data => {
-            console.log("Notifications data received:", data);
-            const notificationsList = document.getElementById('notifications-list');
-            if (!notificationsList) {
-                console.error("Notifications list element not found");
-                return;
-            }
+            console.log("Chart data received:", data);
             
-            if (data && Array.isArray(data) && data.length > 0) {
-                notificationsList.innerHTML = '';
-                data.forEach(notification => {
-                    notificationsList.innerHTML += `
-                        <div class="notification-item d-flex align-items-center">
-                            <div class="notification-icon">
-                                <i class="fas fa-bell"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="fw-bold">${notification.title || 'Notification'}</div>
-                                <div>${notification.message || 'No message'}</div>
-                                <div class="notification-time">${formatDateTime(notification.created_at)}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                notificationsList.innerHTML = '<div class="text-center p-3">No new notifications</div>';
-            }
+            // Revenue Chart
+            createRevenueChart(data.revenue_chart);
+            
+            // Ticket Distribution Chart
+            createTicketDistributionChart(data.ticket_distribution);
         })
         .catch(error => {
-            console.error('Error fetching notifications:', error);
-            const notificationsList = document.getElementById('notifications-list');
-            if (notificationsList) {
-                notificationsList.innerHTML = '<div class="text-center p-3">Failed to load notifications</div>';
-            }
+            console.error('Error fetching chart data:', error);
+            showError('revenueChart', 'Failed to load chart data.');
+            showError('ticketDistributionChart', 'Failed to load chart data.');
         });
-    
-    function loadCharts() {
-        fetch('/api/dashboard/charts/')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Chart data received:", data);
-                
-                // Revenue Chart
-                createRevenueChart(data.revenue_chart);
-                
-                // Ticket Distribution Chart
-                createTicketDistributionChart(data.ticket_distribution);
-            })
-            .catch(error => {
-                console.error('Error fetching chart data:', error);
-                showError('revenueChart', 'Failed to load chart data.');
-                showError('ticketDistributionChart', 'Failed to load chart data.');
-            });
     }
     
     function createRevenueChart(chartData) {
@@ -389,6 +846,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error("Revenue chart canvas not found");
             }
             
+            const gradientFill = revenueCtx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradientFill.addColorStop(0, 'rgba(67, 97, 238, 0.3)');
+            gradientFill.addColorStop(1, 'rgba(67, 97, 238, 0.05)');
+            
             new Chart(revenueCtx.getContext('2d'), {
                 type: 'line',
                 data: {
@@ -396,14 +857,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     datasets: [{
                         label: 'Revenue',
                         data: chartData.data,
-                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                        borderColor: 'rgba(78, 115, 223, 1)',
-                        borderWidth: 2,
-                        pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                        pointBorderColor: '#fff',
+                        backgroundColor: gradientFill,
+                        borderColor: '#4361ee',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#4361ee',
                         pointBorderWidth: 2,
-                        pointRadius: 3,
-                        tension: 0.3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0.4,
                         fill: true
                     }]
                 },
@@ -412,21 +874,63 @@ document.addEventListener('DOMContentLoaded', function() {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: true
+                            display: true,
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            padding: 15,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Revenue: Rs. ${context.raw}`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             grid: {
-                                drawBorder: false
+                                drawBorder: false,
+                                color: 'rgba(200, 200, 200, 0.15)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                },
+                                callback: function(value) {
+                                    return 'Rs. ' + value;
+                                }
                             }
                         },
                         x: {
                             grid: {
                                 display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
                             }
                         }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    animation: {
+                        duration: 2000
                     }
                 }
             });
@@ -437,7 +941,7 @@ document.addEventListener('DOMContentLoaded', function() {
             container.innerHTML = `<div class="alert alert-danger">Failed to load revenue chart: ${error.message}</div>`;
         }
     }
-    
+
     function createTicketDistributionChart(chartData) {
         try {
             if (!chartData || !chartData.labels || !chartData.data) {
@@ -456,13 +960,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     datasets: [{
                         data: chartData.data,
                         backgroundColor: [
-                            'rgba(78, 115, 223, 0.7)',
-                            'rgba(28, 200, 138, 0.7)',
-                            'rgba(54, 185, 204, 0.7)',
-                            'rgba(246, 194, 62, 0.7)',
-                            'rgba(231, 74, 59, 0.7)'
+                            '#4361ee',
+                            '#3a0ca3',
+                            '#4895ef',
+                            '#4cc9f0',
+                            '#f72585'
                         ],
-                        borderWidth: 1
+                        borderWidth: 5,
+                        borderColor: '#ffffff'
                     }]
                 },
                 options: {
@@ -470,8 +975,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom'
-                        }
+                            display: true,
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        
                     },
                     cutout: '70%'
                 }
@@ -481,50 +992,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Error creating ticket distribution chart:", error);
             const container = document.getElementById('ticketDistributionChart').parentNode;
             container.innerHTML = `<div class="alert alert-danger">Failed to load ticket chart: ${error.message}</div>`;
-        }
-    }
-    
-    function getStatusClass(status) {
-        if (!status) return 'bg-secondary';
-        
-        switch(status.toLowerCase()) {
-            case 'pending':
-            case 'requested':
-                return 'bg-warning';
-            case 'approved':
-                return 'bg-success';
-            case 'rejected':
-                return 'bg-danger';
-            case 'completed':
-                return 'bg-info';
-            default:
-                return 'bg-secondary';
-        }
-    }
-    
-    function formatDate(dateString) {
-        if (!dateString) return 'N/A';
-        
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return 'Invalid Date';
-            return date.toLocaleDateString();
-        } catch (error) {
-            console.error(`Error formatting date ${dateString}:`, error);
-            return 'Error';
-        }
-    }
-    
-    function formatDateTime(dateString) {
-        if (!dateString) return 'N/A';
-        
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return 'Invalid Date';
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-        } catch (error) {
-            console.error(`Error formatting datetime ${dateString}:`, error);
-            return 'Error';
         }
     }
 });

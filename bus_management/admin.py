@@ -7,6 +7,7 @@ from .utils import create_vehicle_with_seats, initialize_seat_availability
 from django.contrib import messages
 from django.utils.html import format_html
 from .forms import TicketAdminForm, SpecialReservationAdminForm  # Import the SpecialReservationAdminForm
+from django.db import transaction
 
 
 @admin.register(VehicleType)
@@ -321,7 +322,8 @@ class SpecialReservationAdmin(admin.ModelAdmin):
                     )
                     # Revert to previous status
                     obj.status = old_status or 'REQUESTED'
-                    return super().save_model(request, obj, form, change)
+                    super().save_model(request, obj, form, change)
+                    return
                     
                 elif conflict_type == 'special_reservation':
                     conflict_detail = (f"{conflict.source} to {conflict.destination}, "
@@ -333,21 +335,23 @@ class SpecialReservationAdmin(admin.ModelAdmin):
                     )
                     # Revert to previous status
                     obj.status = old_status or 'REQUESTED'
-                    return super().save_model(request, obj, form, change)
-            
-            # If no conflicts, update vehicle status to RESERVED
-            obj.vehicle.status = 'RESERVED'
-            obj.vehicle.save(update_fields=['status'])
-            messages.success(request, f"Vehicle {obj.vehicle.name} status updated to RESERVED.")
-            
-        # If status is changing from APPROVED to something else, update vehicle status back to ACTIVE
-        elif old_status == 'APPROVED' and obj.status != 'APPROVED':
-            obj.vehicle.status = 'ACTIVE'
-            obj.vehicle.save(update_fields=['status'])
-            messages.success(request, f"Vehicle {obj.vehicle.name} status updated to ACTIVE.")
-            
-        # Save the special reservation
-        super().save_model(request, obj, form, change)
+                    super().save_model(request, obj, form, change)
+                    return
+        
+        try:
+            with transaction.atomic():
+                # If we're approving the reservation, update vehicle status
+                if old_status != 'APPROVED' and obj.status == 'APPROVED':
+                    obj.vehicle.status = 'RESERVED'
+                    obj.vehicle.save(update_fields=['status'])
+                
+                # Save the reservation
+                super().save_model(request, obj, form, change)
+        except Exception as e:
+            messages.error(request, f"Error saving reservation: {str(e)}")
+            # If there's an error, revert to the previous status
+            if old_status:
+                obj.status = old_status
 
 @admin.register(SeatAvailability)
 class SeatAvailabilityAdmin(admin.ModelAdmin):

@@ -300,7 +300,15 @@ class VehicleViewSet(viewsets.ModelViewSet):
             }
             
             logger.info("Dashboard API completed successfully")
-            return Response(response_data)
+            from rest_framework.response import Response
+            from rest_framework import status
+            
+            # Add CORS headers to allow requests from the dashboard page
+            response = Response(response_data)
+            response["Access-Control-Allow-Origin"] = "*"
+            response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+            response["Access-Control-Allow-Headers"] = "Content-Type, X-CSRFToken"
+            return response
             
         except Exception as e:
             import logging
@@ -388,7 +396,15 @@ class VehicleViewSet(viewsets.ModelViewSet):
             }
             
             logger.info("Dashboard charts API completed successfully")
-            return Response(response_data)
+            from rest_framework.response import Response
+            from rest_framework import status
+            
+            # Add CORS headers to allow requests from the dashboard page
+            response = Response(response_data)
+            response["Access-Control-Allow-Origin"] = "*"
+            response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+            response["Access-Control-Allow-Headers"] = "Content-Type, X-CSRFToken"
+            return response
             
         except Exception as e:
             logger.error(f"Error in dashboard charts API: {str(e)}")
