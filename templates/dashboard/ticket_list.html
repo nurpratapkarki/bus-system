@@ -1,0 +1,398 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Tickets | Bus Management System{% endblock %}
+
+{% block extrastyle %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Mukta', 'Segoe UI', sans-serif;
+    }
+    
+    .page-title {
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+    
+    .page-title h1 {
+        font-weight: 600;
+        color: #212529;
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+    }
+    
+    .page-title p {
+        color: #6c757d;
+        font-size: 1.05rem;
+    }
+    
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 4px;
+        width: 60px;
+        background: #4361ee;
+        border-radius: 2px;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+        margin-bottom: 25px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #4361ee, #3f37c9);
+        color: white;
+        border-bottom: none;
+        padding: 20px 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .card-header i {
+        margin-right: 12px;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        border: none;
+        background-color: #f8f9fa;
+        padding: 12px 15px;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .table td {
+        padding: 12px 15px;
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f4;
+        font-size: 0.95rem;
+    }
+    
+    .table tbody tr {
+        transition: all 0.2s;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+    
+    .id-cell {
+        font-family: monospace;
+        font-size: 0.8rem;
+        background-color: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 4px;
+        color: #555;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 80px;
+        display: inline-block;
+    }
+    
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .status-pending {
+        background-color: rgba(251, 133, 0, 0.15);
+        color: #fb8500;
+    }
+    
+    .status-approved, .status-confirmed {
+        background-color: rgba(0, 180, 216, 0.15);
+        color: #00b4d8;
+    }
+    
+    .status-completed {
+        background-color: rgba(43, 147, 72, 0.15);
+        color: #2b9348;
+    }
+    
+    .status-cancelled, .status-rejected {
+        background-color: rgba(247, 37, 133, 0.15);
+        color: #f72585;
+    }
+    
+    .price-cell {
+        font-weight: 600;
+        color: #2b9348;
+    }
+    
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.3s;
+        margin: 0 3px;
+    }
+    
+    .btn-print {
+        background: #4361ee;
+        color: white;
+        border: none;
+    }
+    
+    .btn-print:hover {
+        background: #3f37c9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-view {
+        background: #00b4d8;
+        color: white;
+        border: none;
+    }
+    
+    .btn-view:hover {
+        background: #0077b6;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 180, 216, 0.3);
+    }
+    
+    .filters {
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(149, 157, 165, 0.1);
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .pagination {
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    .pagination .page-item .page-link {
+        color: #4361ee;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        margin: 0 3px;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #4361ee;
+        color: white;
+    }
+    
+    .pagination .page-item .page-link:hover {
+        background-color: rgba(67, 97, 238, 0.1);
+    }
+    
+    .no-data {
+        padding: 30px;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .no-data i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="page-title animate-fade-in">
+        <h1>Special Reservation Tickets</h1>
+        <p class="text-muted">Manage and print tickets for all special reservations</p>
+    </div>
+    
+    <div class="filters animate-fade-in">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="PENDING" {% if request.GET.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <option value="APPROVED" {% if request.GET.status == 'APPROVED' %}selected{% endif %}>Approved</option>
+                    <option value="CONFIRMED" {% if request.GET.status == 'CONFIRMED' %}selected{% endif %}>Confirmed</option>
+                    <option value="COMPLETED" {% if request.GET.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                    <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" name="search" id="search" class="form-control" placeholder="Customer or Vehicle" value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-2">
+                <label for="date_from" class="form-label">From Date</label>
+                <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request.GET.date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label for="date_to" class="form-label">To Date</label>
+                <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request.GET.date_to }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="card animate-fade-in">
+        <div class="card-header">
+            <i class="fas fa-ticket-alt"></i> Special Reservation Tickets
+        </div>
+        <div class="card-body p-0">
+            {% if reservations %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px">ID</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Start Date</th>
+                            <th>Status</th>
+                            <th class="text-end">Price</th>
+                            <th style="width: 110px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                        <tr class="animate-fade-in" style="animation-delay: {{ forloop.counter|add:"-1" }}00ms">
+                            <td>
+                                <span class="id-cell" title="{{ reservation.id }}">{{ reservation.id|truncatechars:8 }}</span>
+                            </td>
+                            <td>{{ reservation.customer_name }}</td>
+                            <td>{{ reservation.vehicle_name }}</td>
+                            <td>{{ reservation.departure_time }}</td>
+                            <td>
+                                <span class="status-badge 
+                                    {% if reservation.status == 'APPROVED' or reservation.status == 'CONFIRMED' %}status-approved
+                                    {% elif reservation.status == 'COMPLETED' %}status-completed
+                                    {% elif reservation.status == 'CANCELLED' or reservation.status == 'REJECTED' %}status-cancelled
+                                    {% else %}status-pending{% endif %}">
+                                    {{ reservation.status }}
+                                </span>
+                            </td>
+                            <td class="price-cell text-end">Rs. {{ reservation.final_price }}</td>
+                            <td>
+                                <div class="d-flex">
+                                    <a href="{% url 'reservation_ticket' reservation_id=reservation.id %}" class="btn btn-action btn-view" title="View Ticket">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'reservation_ticket' reservation_id=reservation.id %}?print=true" 
+                                       class="btn btn-action btn-print" 
+                                       title="Print Ticket"
+                                       onclick="window.open(this.href, '_blank', 'width=800,height=600'); return false;">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if paginator.num_pages > 1 %}
+            <div class="pagination-container py-3">
+                <ul class="pagination">
+                    {% if reservations.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ reservations.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in paginator.page_range %}
+                    {% if num == reservations.number %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > reservations.number|add:"-3" and num < reservations.number|add:"3" %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    
+                    {% if reservations.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ reservations.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="no-data">
+                <i class="fas fa-ticket-alt"></i>
+                <h4>No tickets found</h4>
+                <p>Try adjusting your filters or create a new special reservation.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // If there's a print parameter, automatically open print dialog
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('print') === 'true') {
+            setTimeout(function() {
+                window.print();
+            }, 1000); // Delay to ensure page is fully loaded
+        }
+    });
+</script>
+{% endblock %} 

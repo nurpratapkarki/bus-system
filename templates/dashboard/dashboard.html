@@ -646,19 +646,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 reservationsTable.innerHTML += `
                     <tr class="animate-fade-in" style="animation-delay: ${delay}ms">
-                        <td><span class="id-cell" title="${reservation.id}">${truncatedId}</span></td>
-                        <td>${reservation.customer_name}</td>
-                        <td>${reservation.vehicle_name}</td>
-                        <td>${formatDateTime(reservation.start_time)}</td>
-                        <td><span class="status-badge ${statusClass}">${reservation.status}</span></td>
-                        <td class="price-cell">Rs. ${parseFloat(reservation.final_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td>
-                            <a href="/admin/bus_management/specialreservation/${reservation.id}/change/" 
-                               class="btn btn-sm btn-primary action-btn" 
-                               title="View details">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </td>
+                        <td><div class="d-flex px-2 py-1"><div class="d-flex flex-column justify-content-center"><a href="/dashboard/reservation/${reservation.id}/ticket/" class="reservation-id" title="${reservation.id}">${truncatedId}...</a></div></div></td>
+                        <td><p class="text-xs font-weight-bold mb-0">${reservation.customer_name}</p></td>
+                        <td class="align-middle text-center"><span class="badge badge-sm ${statusClass}">${reservation.status}</span></td>
+                        <td class="align-middle text-center"><span class="text-secondary text-xs font-weight-bold">${formatDateTime(reservation.start_time)}</span></td>
+                        <td class="align-middle text-end"><span class="text-secondary text-xs font-weight-bold price-cell">Rs. ${parseFloat(reservation.final_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></td>
+                        <td class="align-middle"><a href="/dashboard/reservation/${reservation.id}/ticket/" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="View Ticket"><i class="fas fa-ticket-alt"></i></a></td>
                     </tr>
                 `;
             });

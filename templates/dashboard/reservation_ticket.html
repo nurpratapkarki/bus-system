@@ -1,0 +1,461 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Reservation Ticket | Bus Management System{% endblock %}
+
+{% block extrastyle %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Mukta', 'Segoe UI', sans-serif;
+    }
+    
+    .ticket-container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 0;
+        background: white;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ticket-header {
+        background: linear-gradient(135deg, #4361ee, #3f37c9);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-bottom: 3px solid #ff9933;
+    }
+    
+    .ticket-logo {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .ticket-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .ticket-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .ticket-body {
+        padding: 20px;
+        position: relative;
+    }
+    
+    .ticket-label {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .ticket-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    
+    .ticket-detail-row {
+        margin-bottom: 20px;
+    }
+    
+    .ticket-status {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .status-approved {
+        background-color: rgba(0, 180, 216, 0.15);
+        color: #00b4d8;
+    }
+    
+    .status-completed {
+        background-color: rgba(43, 147, 72, 0.15);
+        color: #2b9348;
+    }
+    
+    .status-pending {
+        background-color: rgba(251, 133, 0, 0.15);
+        color: #fb8500;
+    }
+    
+    .status-cancelled {
+        background-color: rgba(247, 37, 133, 0.15);
+        color: #f72585;
+    }
+    
+    .ticket-price {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2b9348;
+    }
+    
+    .ticket-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 8rem;
+        opacity: 0.03;
+        pointer-events: none;
+    }
+    
+    .ticket-footer {
+        border-top: 1px dashed #ccc;
+        padding: 15px 20px;
+        text-align: center;
+        font-size: 0.9rem;
+        background: #f8f9fa;
+        color: #666;
+    }
+    
+    .ticket-barcode {
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .ticket-barcode img {
+        max-width: 250px;
+    }
+    
+    .actions-row {
+        margin-top: 30px;
+        padding: 0 20px 20px;
+    }
+    
+    .btn-action {
+        background: #4361ee;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 5px;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        margin: 0 5px;
+    }
+    
+    .btn-print {
+        background: #4361ee;
+    }
+    
+    .btn-print:hover {
+        background: #3f37c9;
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-back {
+        background: #6c757d;
+    }
+    
+    .btn-back:hover {
+        background: #5a6268;
+    }
+    
+    .btn-tickets {
+        background: #00b4d8;
+    }
+    
+    .btn-tickets:hover {
+        background: #0077b6;
+    }
+    
+    .divider {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #ff9933, transparent);
+        margin: 15px 0;
+    }
+    
+    .decorative-border {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 8px;
+        background: repeating-linear-gradient(
+            45deg,
+            #ff9933,
+            #ff9933 10px,
+            transparent 10px,
+            transparent 20px
+        );
+    }
+    
+    .ticket-stamp {
+        position: absolute;
+        top: 40px;
+        right: 40px;
+        width: 100px;
+        height: 100px;
+        border: 3px solid #2b9348;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(15deg);
+        opacity: 0.8;
+    }
+    
+    .ticket-stamp-text {
+        font-weight: 700;
+        color: #2b9348;
+        font-size: 1rem;
+        text-transform: uppercase;
+        text-align: center;
+        line-height: 1.2;
+    }
+    
+    @media print {
+        body {
+            background: white;
+        }
+        
+        .ticket-container {
+            box-shadow: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .actions-row {
+            display: none;
+        }
+        
+        .btn-back,
+        .nav-header {
+            display: none;
+        }
+        
+        .ticket-stamp {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        
+        .ticket-header {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        
+        .status-badge {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        
+        .decorative-border {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container {% if print_mode %}d-print-block{% endif %}">
+    {% if not print_mode %}
+    <div class="row mb-3">
+        <div class="col d-flex">
+            <a href="/dashboard/" class="btn btn-action btn-back me-2">
+                <i class="fas fa-arrow-left me-1"></i> Dashboard
+            </a>
+            <a href="{% url 'ticket_list' %}" class="btn btn-action btn-tickets">
+                <i class="fas fa-list me-1"></i> All Tickets
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="ticket-container">
+        <div class="decorative-border"></div>
+        
+        <!-- Ticket Header -->
+        <div class="ticket-header">
+            <div class="ticket-logo">
+                <i class="fas fa-bus"></i>
+            </div>
+            <h1 class="ticket-title">Bus Management System</h1>
+            <p class="ticket-subtitle">Special Reservation Ticket</p>
+        </div>
+        
+        <div class="ticket-body">
+            <!-- Reservation Info -->
+            <div class="ticket-watermark">
+                <i class="fas fa-bus"></i>
+            </div>
+            
+            {% if reservation.status == 'APPROVED' or reservation.status == 'CONFIRMED' %}
+            <div class="ticket-stamp">
+                <div class="ticket-stamp-text">
+                    Approved
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Reservation ID</div>
+                        <div class="ticket-value">{{ reservation.id }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Status</div>
+                        <div class="ticket-value">
+                            <span class="ticket-status 
+                                {% if reservation.status == 'APPROVED' or reservation.status == 'CONFIRMED' %}status-approved
+                                {% elif reservation.status == 'COMPLETED' %}status-completed
+                                {% elif reservation.status == 'CANCELLED' or reservation.status == 'REJECTED' %}status-cancelled
+                                {% else %}status-pending{% endif %}">
+                                {{ reservation.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Customer Name</div>
+                        <div class="ticket-value">{{ reservation.customer_name }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Vehicle</div>
+                        <div class="ticket-value">{{ reservation.vehicle_name }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Source</div>
+                        <div class="ticket-value">{{ reservation.source }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Destination</div>
+                        <div class="ticket-value">{{ reservation.destination }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Departure Date & Time</div>
+                        <div class="ticket-value">{{ reservation.departure_time }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Duration</div>
+                        <div class="ticket-value">{{ reservation.duration_days }} day(s)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Passenger Count</div>
+                        <div class="ticket-value">{{ reservation.passenger_count }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Trip Type</div>
+                        <div class="ticket-value">
+                            {% if reservation.is_round_trip %}Round Trip{% else %}One Way{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Deposit Paid</div>
+                        <div class="ticket-value">Rs. {{ reservation.deposit_amount }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ticket-detail-row">
+                        <div class="ticket-label">Balance Due</div>
+                        <div class="ticket-value">Rs. {{ reservation.balance_amount }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12 text-center mb-4">
+                    <div class="ticket-label">Total Price</div>
+                    <div class="ticket-price">Rs. {{ reservation.final_price }}</div>
+                </div>
+            </div>
+            
+            <div class="ticket-barcode">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAB4CAYAAADc36lqAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAQHklEQVR4nO3dW2wc533H8e+Z2Qte1qJEibpQsmJJli+y7MRJ07RO3DRN0jZwWhRwgCLpgw0U6HtfosCb7/3YhwJFECRwXmqgKJoidtMUbdHESOM0dVzHjmX5Ikuy7pJ1IbnLvczMKbR2lyK55C6XOzO7/H8AwSZ3z5x/aM2P55w5M6K1RtM+IjIJfMz5NQlcAF50fu3XWs82qz1KqeaFVuouyYhUGxGZAD7p/HoMeAV40fl1Vmt9oVntkUbtN9qnIpKqqiSTyiAiecQhjZ8/LfA94EWt9d5mt1cpVT8akOqViEjuBj4FfAb4GfA94Pv1Gt2U+n1VJJVqLRGRlIjIbcCfAb8MfBP41tatW/+52e1SSlWfBqT8JSKSMgzjU8Aa8G/At4BTug36QymVjAiRRORu4PPA7wIvAKtN/C9USjVQORGJi8gKsA78q9Z6I3ktUkrVy7aIiIg8CvwB8FngW8D3tNZXEt80pVRdbYuIiEgGmAW+q7W+mnBzlFJNcF1ARCSrtT6bcHuUUgmwLSIiIluAc1rr0YTbo5RKiOsiIiK7gH9JuD1KqQSJisjDJd6jlFIRJiIyDFxJuC1KqYQRpxiYTrotSqlkKb2YUErVwLaIiIgMa633JdwWpVTCaNmKUu1JSw2lWouIvA/4JjCWdFuUUsmiIanM84hMiMgngJeA52gxKpJKtT4RMUXkUyKySyQyICIP/QJxOSQiO0qcR6RfRD4uIh8C9rXAQb9SbUREDOAZEflDEflg2F9dIiK/DrwuIh+XRu8BolQLE5EeEfldEfkdEekM+6tHROSgU/m0X0QOtcCBvlItTUR6ReSPROQPRKQv7K/dInJERF4RkWMi0hf215TS31tKtSwR6ReRzxUKhecKhUJP2F8DIrInIi/ui0hfC3w/KNXWIkckInJQRF4sWZa1LiKHw/4WEZF+EfmSZVm7LMs6G/bXktLfW0q1rIqnswQQEelxRiLHROSIiHSF/VWktc6KyDmgT1cGUyoSyg2J7AQ+KCLvFJEu4FKYdTIiYmitc2FeSykVnXJDIr8pIm8TkS4ReT3ML1ERuQIE9QytlGqwskIiInJ3SVgeCftrTkSOaq33hP21pJQqT7nTWT0i8pQTliMi0hPm16CIvKCU+pn+nlKqZVU0nSUi00BaKXUtzC9aEdFKKaUPApRquJ+9XE1pkdXPF8OtO7lHRJ5wCq4mwvzqFJFHlVLfQ2utb1JKNVpkoSAi3SLSF2bptYh8QSm1CKC/l5RqWQ2tWBGRJ5VSLwNorZVSqmGUUjdqaKFVkYg8JiJfp8FhEZHfcNbl6GMApVpYwws9ReQ+pdT/wfVhfRl4RSml79OUalGRKPQUkQeVUvsB0JC0PqN3lFKNFYlCT6WUUioeHZEopZQbGhKllHJBQ6KUUi5oSJRSygUNiVJKuaAhUUopFzQkSinlgoZEKaVc0JAopZQLGhKllHJBQ6KUUi5oSJRSygUNiVJKuaAhUUopFzQkSinlgoZEKaVc0JAopZQLGhKllHJBQ6KUUi5oSJRSygUNiVJKuRCJfVhF5Fal1OmScxPAx5xfk8AF4EXn136t9Wyj2xgH+nrGR1+PeOjrUR/6ekSj7LI3IiKTwH8Ce7XW8yJiAJ8E/hr4U631tE+xHxWR1xvfUl/MLSwt/cuzP9w3cWhy59XZeZkYHbkGsLS8ss32gv2Z9FxnV9cwbBMtVzE7OqG7G7QNoUBPl7UxNNA/YZimaIEuO3W+f3ho5fLVWSGVQlIpbCtwrbvLO9STzTJ9cVr6e3rOzl6dyzx85/FXL1yalr7ururuyeYvp4kP5/XYQ1yr/SLyG1rr5xrdsLhZXFo+OL+w+MTJU+fYu3sn77z/7swbb555anRo4L4rc3MjxQcWCoXCL95990c+9YEPSCadZmlpaXpyYuKpw7ffdvWXT5585Oc/+MGXTp4+HSwtLXe/4+DBH584cMB75IGjtRnpd3YsLy/rk2fOqPfceWffuXPnvO6ursmD+/f1F/L5g2+euXD2vvvvvnxuavoT/1V4s+f+PXveOr5jR+9Xn/0fO5NJg22DUsDCXPfMxYuv3XvvPU9quxB1xc4L4GvOz6oWl5bnAD796U+L1pq+3t6Lz//oR08/9uAD3Vev5RZ/56Of/EXxwVprLSJfO3D40Bu//PCjANx6YL9+cPKW3gcnb9GmYUx94StfMlJG6vDttz9qdHT0oDWebW9pNYNDGZnYOQYwDHDXnXc8lc/nRnqyI1++NHOl/5dOPPb0jh3jlj/tXS/i62HOO+eqPp3lrIt/GFh24jF5dXZ+9sLFS/S/9U7eevutufVcpzOlgO1dGlpcXHjbRn5jo1AoMHdrP/d19egHJw8Yb565MC5GakRrfSHMR81SLpebanLZ6pptDz8yMzP3u7ZtM7+wMDUyPPyqGMbRrq7uoc7OrppP59lFFbctqTUSEflH59fbaK3nRESAp4A5rfVrfgQXkYIzbfXAuYszp4YHB8kXCuQLBcrNZqlUiuGB/ulcLncC8LaSmcvl8t5sdlbbmoWlJc/YGKPzS4vMz891FWw7rYy67q1RDaZpEgS2ZVnWPLAIkEqlBpxjpqrcGpL/LjnnNiQpwHPWMwDpbGcxIpRdVwgiQi6XmwYeKT1fRHqBSRGZM00z17Ozr6bvEI+JuJyzLHvOtu0CUAPbqXJ9bLQUjUcFIVFKqbbQsFjHTYO6EZKoKhaUUioOYQdEDxSVUjcrW9l7bkRbPq/0IQf7Simlig/1yxbWsne0lAZEKaU2W9YHCUop5UJcQ6KjGaVUtW4eXtCSsD7I2eoROlxXSrVc3OIaEqWUio2G7I9+k9LpLF2rUErdbNO+K5EYkWhElFKblW0RRkUjGLdolI5jlGp7bbMfSdxGJG3TUUqpTbSORJRSarOyjqkaNSKJW0hKaUSUUpttoiOSuNHRiFKqmDZEJDcaaSilVMtpy5DowYJSqtjWB/otOUJQSqkbabuQKKXUZm21RqKUUptVtLlVjUJSPE/bzLIcpVRJRCIS0SkrDYhSyouIfz+VVuyyN6WUahcaEqWUckFDopRSLmhIlFLKBQ2JUkq5oCFRSikXNCRKKeWChkQppVzQkCillAsaEqWUckFDopRSLmhIlFLKBQ2JUkq5oCFRSikXNCRKKeWChkQppVzQkCillAsaEqWUckFDopRSLmhIlFLKBQ2JUkq5oCFRSikXNCRKKeWChkQppVzQkCillAsaEqWUckFDopRSLmhIlFLKBQ2JUkq5oCFRSikXNCRKKeWChkQppVzQkCillAsaEqWUckFDopRSLmhIlFLKBQ2JUkq5oCFRSikXNCRKKeWChkQppVzQkCillAsaEqWUckFDopRSLmhIlFLKBQ2JUkq5oCFRSikXNCRKKeWChkQppVzQkCillAsaEqWUckFDopRSLmhIlFLKBQ2JUkq5oCFRSikXNCRKKeWChkQppVxoCXsxfqXr49GWLyitdAvRyq82pBGJNXv5WpMboJRKSKQjEplbL6Wy71gpFaNIh6TyYYiIttfsTdNcSqlWEvmQVDQcEZH5CxcAEKOyxiiloiUie4EXtNY7k24LRD8ilKyRbDoiIoZhWA89dB8ZaV44lFJuiIgJfAT4yyjEBFogJKWcmDi/bXP31IHMnJDJ2IAlQOr6g/TBQUuzdKTRWnZFBEprraO8NhKZiCAi6S1bgn1Hj6benJpKddg2y+m0WLYt1tWrIzraaA0iMiIi+1sgIpGJCERkTGH2w9/9zjf7jxxBI7JUSKHtcltWek93y/N1RLJxdXbO6urqOrhj+7j//+NKxZyIdJcGJcKjkcgMVQ4Q7BoHLAvyebQAcwVhaQlh6yRaS9bXRiWs8m5u2/bc1atXBxcXF6ueTlCqHYnIBHB3Eh83lxuJzJckMnctpZILMg6wsoLk8wjA/Dyyvg4gxMSqB6ZdRSQvIjuCIDjV09OzqO9hqpSIpIAHgV9ImjMF9UDJdNYB4O+Bo9WOSETaY0QiIrOGYZwwDOPc0NBQkHR7lGoREUhkUkSGRWS51D+JyBOVvj52IRGRzxiG8T7TNM2VlZUn7j/+wM8/8/E/HLh9cvKDpb+ViiQReVhEhmjFkJSWv5ecv0tE3lbtOklLh0REDhqG8S7TNPszmcyRzs7OXZ2dnRtHXnvjlVce/4UPPtPvjE5aKCatWemmlIqQtg9J6VpI8XGJ1vrBau8T6T02yllXFxGjUChYwNDpixeNw7ffNnN0//5b333sKO8+dpRUKsXpixf3bNnS9Vyq5v6h0S9KGl1cXKS3tzfp5qh21xZrJCJyh4g87JQFPGcYxrBhGAVnzeLdlNYo56Fhh8R59LtE5BGn/D3GVW/uRLoKy1ljT7tZUHdGJ93ANLBfRN4NmM6Ue5sQkTQiy8BrIrIHKH7dVB0S55z7/oVKqRpFOiQi0u/EY8owjDOmaW6s2dvahszmoKPjuoZ0daEzGTAMRAStdcuGxKl4q+MYrXKaiaXaXaRD4kTgXaZpHurt7c1orRkbHWXp5EmyQ0MwOHh9Q3bsQDZtB1KJVn4rrxSlklRWQEQkFpVWsZ3OEpH7RORdqVRqoFAokEql6Ovtlf179/D/X/4y/PDlLbI6l5F8HpwprKRDUsECvVKqGVp5jSQ2IXGmsR4zTXPSNM2MiIDWdHV1ke3vlyvnzxtvvPYTw3jxX9P58xdT5FYnAM4BZ53zXyHZ6iy3xwFKqQZrRUhiM50lIreKyDFnCqvgfOjT09PDwOCg9A0O2jJ5tNPYf8iU1bneA3u3fxWQ0rtqrddF5JvA/0Tjab65qNYx5WxBcQvQB5wDzmmtV5JtlWp3TsXivcDRZt5LaXOOIhUnIjIhIu8D9gKXgHPAitb6YjOj0SpKygNCTqWrUQvEYkQiIiYwAMwDl0XkJzQnJHXRSouXTnmA5fwQeVVELktJ1WItRgFKtbhI/qXYLCIi0gnsAo6KyMPAFHARuBBiSOoxGvG9lFRE+oDDwDEReRU4tbCwMB9yiFriO1K1jkg+kKqUiDyutX5NRO4F7haRfcB5J4Yy2ti5/EiMRryUktqGYYwODQ3du2fPnq7333efN4e6UbQGq8Vh1pN9pNpMJENSoVXbtvuAI8BdInIOuK4QrYF8qR8v8tDqCqSw7dTqtWv5ixcvsr66OizbeE8UrcE78QEUClo3qlo+UlVYFS6OlwZlJ/CEiNwBnCbcKa1aTGvVZRrrxscEgZHG6D528KDsueUAd+ybJN3RaQJDJeftQrHnbGTHuDcVMvVoV6JVWFUujo/Srx1a64si8h1grwdN89KHvQjwk8D7777rnmP338++W/aSzXZTyOfRWwI0IKlUGlvbsHd3+M3QGhH/RiZKleVGIRHFnQhLRyUnK/jgr4vIFPCu7u7u1MMPTJLtzrKwsMDw4FBmfn7e0FprEekFdmutL5T8m3oj4ttIpMTdwJfD/EJUqly1LiCMAr0SkYPAvWGWbYrIg0opA3i0UChct1ait1ZUxCIkjRyZiFLl0IKxH21nj/CgkZRSG7RgTCnVfG0dklqnpHRqSyml01lKKbeaFRIt5fZH24ZEL0ApVSwSezYnQaeylFJNFlpIoiwSVVi6YK6UKhbafhdtFZKbn9NbKdX+wgxJW4WkWCNGJ3pgolR4IlExFyWh78HQSnoLhUKhSR1V9xGIiNwF/GnS7VAq4aLxsG+0OMyLlOXl5cGk2wD1r9xSSoVPQ+KBIAja4kGUUm4lcvtdiPZ0loi8orVO7oqrhJ7AKKWaL5EZk/oOSS5dujT1zZe/uWPfnr1dS6trsgNt97bCZr1Ko3yslGoRda++av5z5fN5e25+/sT87Av5zIPHA21rrG0NZQT+t0qlUqkqiUR9FH/+X75T5QRwLvPWzwAAAABJRU5ErkJggg==" alt="Barcode">
+            </div>
+            
+        </div>
+        
+        <div class="ticket-footer">
+            <p>Thank you for choosing Bus Management System</p>
+            <p>For any inquiries, please contact us at support@busmanagement.com</p>
+            <p>This ticket serves as proof of reservation. Please present it during travel.</p>
+        </div>
+    </div>
+    
+    {% if not print_mode %}
+    <div class="actions-row text-center">
+        <a href="{% url 'ticket_list' %}" class="btn btn-action btn-back">
+            <i class="fas fa-list me-1"></i> All Tickets
+        </a>
+        <button class="btn btn-action btn-print" onclick="window.print()">
+            <i class="fas fa-print me-1"></i> Print Ticket
+        </button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Auto print when requested
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if print_mode %}
+        setTimeout(function() {
+            window.print();
+            // Optional: Close window after printing
+            // setTimeout(function() { window.close(); }, 500);
+        }, 1000); // Delay to ensure page is fully loaded
+        {% endif %}
+    });
+</script>
+{% endblock %} 
